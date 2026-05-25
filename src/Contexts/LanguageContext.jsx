@@ -3,10 +3,10 @@ import { createContext, useContext, useState, useCallback } from 'react';
 const LanguageContext = createContext(null);
 
 const LANGUAGES = {
-    en: { label: 'English', flag: '🇺🇸' },
-    bn: { label: 'বাংলা', flag: '🇧🇩' },
-    hi: { label: 'हिन्दी', flag: '🇮🇳' },
-    ar: { label: 'العربية', flag: '🇸🇦' },
+    en: { label: 'English', nativeName: 'English', flag: '🇺🇸' },
+    bn: { label: 'বাংলা', nativeName: 'Bengali', flag: '🇧🇩' },
+    hi: { label: 'हिन्दी', nativeName: 'Hindi', flag: '🇮🇳' },
+    ar: { label: 'العربية', nativeName: 'Arabic', flag: '🇸🇦' },
 };
 
 const translations = {

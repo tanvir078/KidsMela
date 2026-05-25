@@ -286,57 +286,41 @@ export default function ProfilePage() {
 
                         {/* Language & Currency */}
                         <div className="rounded-[22px] bg-white p-4 shadow-sm ring-1 ring-slate-100">
-                            <h2 className="mb-4 flex items-center gap-2 text-[13px] font-black uppercase tracking-wider text-slate-400">
+                            <h2 className="mb-3 flex items-center gap-2 text-[13px] font-black uppercase tracking-wider text-slate-400">
                                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor"><path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 002.77-3.205A18.847 18.847 0 013.67 8.264a1 1 0 011.832-.8c.293.673.611 1.33.953 1.971a16.84 16.84 0 001.323-3.435H2a1 1 0 010-2h3V3a1 1 0 011-1zm7.707 4.293a1 1 0 010 1.414L13.414 9H17a1 1 0 110 2h-3.586l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                                 Language & Currency
                             </h2>
-                            <div className="space-y-5">
-                                <div>
-                                    <label className="mb-2.5 block text-xs font-bold text-slate-500">Display Language</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {Object.entries(availableLanguages).map(([code, lang]) => (
-                                            <button
-                                                key={code}
-                                                type="button"
-                                                onClick={() => changeLanguage(code)}
-                                                className={`flex items-center gap-2.5 rounded-xl px-3.5 py-3 text-sm font-bold transition-all duration-200 active:scale-[0.97] ${
-                                                    language === code
-                                                        ? 'bg-orange-600 text-white shadow-md shadow-orange-200 ring-2 ring-orange-600'
-                                                        : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 hover:ring-slate-300'
-                                                }`}
-                                            >
-                                                <span className="text-lg">{lang.flag}</span>
-                                                <span>{lang.label}</span>
-                                                {language === code && (
-                                                    <svg viewBox="0 0 20 20" className="ml-auto h-4 w-4" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                                                )}
-                                            </button>
-                                        ))}
+                            <div className="space-y-1">
+                                <Link
+                                    href="/settings/language"
+                                    className="flex w-full items-center justify-between rounded-2xl px-3 py-3 transition-all duration-200 hover:bg-slate-50 active:bg-slate-100"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="grid h-9 w-9 place-items-center rounded-xl bg-violet-100">
+                                            <svg viewBox="0 0 20 20" className="h-4.5 w-4.5 text-violet-600" fill="currentColor"><path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 002.77-3.205A18.847 18.847 0 013.67 8.264a1 1 0 011.832-.8c.293.673.611 1.33.953 1.971a16.84 16.84 0 001.323-3.435H2a1 1 0 010-2h3V3a1 1 0 011-1z" clipRule="evenodd"/></svg>
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-bold text-slate-800">Display Language</p>
+                                            <p className="text-[11px] font-medium text-slate-400">{availableLanguages[language]?.flag} {availableLanguages[language]?.label}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="border-t border-slate-100 pt-4">
-                                    <label className="mb-2.5 block text-xs font-bold text-slate-500">Currency</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {availableCurrencies.map((code) => (
-                                            <button
-                                                key={code}
-                                                type="button"
-                                                onClick={() => setCurrency(code)}
-                                                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm font-bold transition-all duration-200 active:scale-[0.97] ${
-                                                    currency === code
-                                                        ? 'bg-orange-600 text-white shadow-md shadow-orange-200 ring-2 ring-orange-600'
-                                                        : 'bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 hover:ring-slate-300'
-                                                }`}
-                                            >
-                                                <span className="text-xs opacity-70">{currencySymbols[code]}</span>
-                                                <span>{code}</span>
-                                                {currency === code && (
-                                                    <svg viewBox="0 0 20 20" className="ml-0.5 h-3.5 w-3.5" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                                                )}
-                                            </button>
-                                        ))}
+                                    <svg viewBox="0 0 20 20" className="h-4 w-4 text-slate-300" fill="currentColor"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd"/></svg>
+                                </Link>
+                                <Link
+                                    href="/settings/currency"
+                                    className="flex w-full items-center justify-between rounded-2xl px-3 py-3 transition-all duration-200 hover:bg-slate-50 active:bg-slate-100"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-100">
+                                            <svg viewBox="0 0 20 20" className="h-4.5 w-4.5 text-emerald-600" fill="currentColor"><path d="M10.75 10.818v2.614A3.13 3.13 0 0011.888 13c.482-.315.612-.648.612-.875 0-.227-.13-.56-.612-.875a3.13 3.13 0 00-1.138-.432zM8.33 8.62c.053.055.115.11.184.164.208.16.46.284.736.363V6.603a2.45 2.45 0 00-.92.363c-.293.18-.418.404-.418.604 0 .2.125.424.418.604z"/><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-6a.75.75 0 01.75.75v.316a3.78 3.78 0 011.653.713c.426.33.744.74.925 1.2a.75.75 0 01-1.395.55 1.35 1.35 0 00-.447-.563 2.187 2.187 0 00-.736-.363V9.3c.514.111.973.292 1.388.543.76.467 1.25 1.168 1.25 2.032 0 .864-.49 1.565-1.25 2.032-.415.25-.874.432-1.388.543v.316a.75.75 0 01-1.5 0v-.316a3.78 3.78 0 01-1.653-.713A2.42 2.42 0 016.75 12.5a.75.75 0 011.395-.55c.12.306.304.522.447.563.175.053.368.09.558.115v-2.812a7.4 7.4 0 01-1.388-.543C7.002 8.806 6.5 8.106 6.5 7.241c0-.864.502-1.565 1.262-2.032.415-.25.874-.432 1.388-.543V4.75A.75.75 0 0110 4z" clipRule="evenodd"/></svg>
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="text-sm font-bold text-slate-800">Currency</p>
+                                            <p className="text-[11px] font-medium text-slate-400">{currencySymbols[currency]} {currency}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                    <svg viewBox="0 0 20 20" className="h-4 w-4 text-slate-300" fill="currentColor"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd"/></svg>
+                                </Link>
                             </div>
                         </div>
 

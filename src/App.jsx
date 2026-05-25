@@ -28,6 +28,8 @@ import ComparePage from './Pages/compare/ComparePage';
 import LoginPage from './Pages/auth/LoginPage';
 import RegisterPage from './Pages/auth/RegisterPage';
 import FlashSalePage from './Pages/flash-sale/FlashSalePage';
+import LanguageSelectPage from './Pages/settings/LanguageSelectPage';
+import CurrencySelectPage from './Pages/settings/CurrencySelectPage';
 import { storefrontApi } from './lib/api';
 import { PageProvider, RouterBridge } from './lib/inertiaCompat';
 
@@ -48,6 +50,8 @@ const routes = [
   { path: '/login', loader: () => Promise.resolve({}), component: LoginPage },
   { path: '/register', loader: () => Promise.resolve({}), component: RegisterPage },
   { path: '/flash-sale', loader: () => Promise.resolve({}), component: FlashSalePage },
+  { path: '/settings/language', loader: () => Promise.resolve({}), component: LanguageSelectPage },
+  { path: '/settings/currency', loader: () => Promise.resolve({}), component: CurrencySelectPage },
 ];
 
 function RouteLoader({ route }) {
