@@ -17,11 +17,11 @@ export default function RecentlyViewedPage() {
                     <div className="relative flex items-center justify-between">
                         <div>
                             <p className="text-xs font-black uppercase tracking-[0.2em] text-white/80">
-                                Browsing history
+                                ব্রাউজিং হিস্টোরি
                             </p>
-                            <h1 className="mt-2 text-2xl font-black">Recently Viewed</h1>
+                            <h1 className="mt-2 text-2xl font-black">সম্প্রতি দেখা</h1>
                             <p className="mt-1 text-sm font-semibold text-white/90">
-                                Your recently viewed products stay on this device. {items.length} item{items.length !== 1 ? 's' : ''}
+                                {items.length}টি পণ্য সম্প্রতি দেখেছেন
                             </p>
                         </div>
                         {items.length > 0 && (
@@ -30,7 +30,7 @@ export default function RecentlyViewedPage() {
                                 onClick={clearItems}
                                 className="rounded-full bg-white/20 px-4 py-2 text-sm font-black transition-all duration-200 hover:bg-white/30 active:scale-95"
                             >
-                                Clear
+                                মুছুন
                             </button>
                         )}
                     </div>
@@ -43,12 +43,12 @@ export default function RecentlyViewedPage() {
                                 <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">No recently viewed products</h2>
+                        <h2 className="mt-5 text-xl font-black text-slate-950">এখনো কোনো পণ্য দেখেননি</h2>
                         <p className="mt-2 text-sm font-semibold text-slate-500">
-                            Products you view will appear here.
+                            যেসব পণ্য দেখবেন সেগুলো এখানে দেখা যাবে
                         </p>
                         <Link href="/" className="mt-6 inline-flex rounded-2xl bg-orange-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95">
-                            Browse Products
+                            পণ্য দেখুন
                         </Link>
                     </div>
                 ) : (

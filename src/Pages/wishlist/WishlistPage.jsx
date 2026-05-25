@@ -12,25 +12,25 @@ export default function WishlistPage() {
 
     const handleShareWishlist = () => {
         const wishlistUrl = typeof window !== 'undefined' ? window.location.href : '';
-        const shareText = `Check out my wishlist on Progotix! ${items.length} items saved.`;
-        
+        const shareText = `Progotix-এ আমার উইশলিস্ট দেখুন! ${items.length}টি পণ্য সেভ করা আছে।`;
+
         if (navigator.share) {
             navigator.share({
-                title: 'My Wishlist',
+                title: 'আমার উইশলিস্ট',
                 text: shareText,
                 url: wishlistUrl,
             });
         } else {
             navigator.clipboard.writeText(wishlistUrl);
             setCopied(true);
-            addToast('Wishlist link copied!', 'success');
+            addToast('উইশলিস্ট লিংক কপি হয়েছে!', 'success');
             setTimeout(() => setCopied(false), 2000);
         }
     };
 
     return (
         <MobileShell title="Wishlist">
-            <Head title="Wishlist" />
+            <Head title="উইশলিস্ট" />
 
             <section className="space-y-4 px-4 py-4">
                 <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-rose-200">
@@ -40,11 +40,11 @@ export default function WishlistPage() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-black uppercase tracking-[0.2em] text-white/80">
-                                    Saved products
+                                    সেভ করা পণ্য
                                 </p>
-                                <h1 className="mt-2 text-2xl font-black">Wishlist</h1>
+                                <h1 className="mt-2 text-2xl font-black">উইশলিস্ট</h1>
                                 <p className="mt-1 text-sm font-semibold text-white/90">
-                                    Your saved products stay on this device. {items.length} item{items.length !== 1 ? 's' : ''} saved
+                                    {items.length}টি পণ্য সেভ করা আছে
                                 </p>
                             </div>
                             {items.length > 0 && (
@@ -67,12 +67,12 @@ export default function WishlistPage() {
                                 <path d="M12 21s-7-4.4-9.2-8.5C.7 8.6 3.1 4 7.4 4c2 0 3.5 1 4.6 2.4C13.1 5 14.6 4 16.6 4c4.3 0 6.7 4.6 4.6 8.5C19 16.6 12 21 12 21Z"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">No saved products yet</h2>
+                        <h2 className="mt-5 text-xl font-black text-slate-950">এখনো কোনো পণ্য সেভ করেননি</h2>
                         <p className="mt-2 text-sm font-semibold text-slate-500">
-                            Tap the heart on any product to save it here.
+                            যেকোনো পণ্যে হার্ট চাপুন সেভ করতে
                         </p>
                         <Link href="/" className="mt-6 inline-flex rounded-2xl bg-rose-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95">
-                            Shop Products
+                            শপিং করুন
                         </Link>
                     </div>
                 ) : (

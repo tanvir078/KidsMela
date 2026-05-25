@@ -5,7 +5,7 @@ import { useToast } from '@/Contexts/ToastContext';
 import OrderTimeline from '@/Components/Storefront/OrderTimeline';
 
 function money(value) {
-    return `$${Number(value ?? 0).toFixed(2)}`;
+    return '৳' + Number(value ?? 0).toLocaleString();
 }
 
 const statusColors = {
@@ -24,15 +24,15 @@ export default function OrdersPage({ orders = [] }) {
     const [cancellingOrderId, setCancellingOrderId] = useState(null);
 
     const handleCancelOrder = (orderId) => {
-        if (!confirm('Are you sure you want to cancel this order?')) return;
+        if (!confirm('আপনি কি এই অর্ডার বাতিল করতে চান?')) return;
         
         setCancellingOrderId(orderId);
         router.delete(`/orders/${orderId}`, {
             onSuccess: () => {
-                addToast('Order cancelled successfully', 'success');
+                addToast('অর্ডার বাতিল হয়েছে', 'success');
             },
             onError: () => {
-                addToast('Failed to cancel order', 'error');
+                addToast('অর্ডার বাতিল করা যায়নি', 'error');
             },
             onFinish: () => {
                 setCancellingOrderId(null);
@@ -58,11 +58,11 @@ export default function OrdersPage({ orders = [] }) {
                     <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
                     <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
                     <div className="relative">
-                        <h1 className="text-2xl font-black">My Orders</h1>
+                        <h1 className="text-2xl font-black">আমার অর্ডার</h1>
                         <p className="mt-2 text-sm font-semibold text-white/90">
                             {user
-                                ? 'Your confirmed Progotix orders appear here.'
-                                : 'Order history is available after login because orders are account protected.'}
+                                ? 'আপনার অর্ডারসমূহ এখানে দেখুন'
+                                : 'অর্ডার হিস্টোরি দেখতে লগইন করুন'}
                         </p>
                     </div>
                 </div>
@@ -74,20 +74,20 @@ export default function OrdersPage({ orders = [] }) {
                                 🔐
                             </div>
                             <div className="flex-1">
-                                <h2 className="text-lg font-black text-slate-950">Login Required</h2>
+                                <h2 className="text-lg font-black text-slate-950">লগইন প্রয়োজন</h2>
                                 <p className="mt-1 text-sm font-semibold text-slate-500">
-                                    Sign in to view your order history
+                                    অর্ডার হিস্টোরি দেখতে লগইন করুন
                                 </p>
                             </div>
                         </div>
                         <div className="mt-5 grid grid-cols-2 gap-3">
                             <Link href="/login" className="flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white transition-all duration-200 hover:bg-slate-800 active:scale-95">
                                 <span>🔑</span>
-                                Login
+                                লগইন
                             </Link>
                             <Link href="/register" className="flex items-center justify-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-black text-orange-600 ring-1 ring-orange-100 transition-all duration-200 hover:bg-orange-100 active:scale-95">
                                 <span>📝</span>
-                                Register
+                                রেজিস্টার
                             </Link>
                         </div>
                     </div>
@@ -98,13 +98,13 @@ export default function OrdersPage({ orders = [] }) {
                         <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white/10 text-4xl">
                             📦
                         </div>
-                        <p className="mt-4 text-center text-xs font-black uppercase tracking-[0.2em] text-orange-300">No orders yet</p>
-                        <h2 className="mt-2 text-center text-xl font-black">Your first order is waiting</h2>
+                        <p className="mt-4 text-center text-xs font-black uppercase tracking-[0.2em] text-orange-300">এখনো কোনো অর্ডার নেই</p>
+                        <h2 className="mt-2 text-center text-xl font-black">প্রথম অর্ডার করুন</h2>
                         <p className="mt-2 text-center text-sm font-semibold leading-6 text-white/70">
-                            Add products to cart and place an order from checkout.
+                            কার্টে পণ্য যোগ করে চেকআউট থেকে অর্ডার করুন
                         </p>
                         <Link href="/" className="mt-5 inline-flex w-full justify-center rounded-2xl bg-white px-5 py-3 text-sm font-black text-slate-950 transition-all duration-200 hover:bg-slate-100 active:scale-95">
-                            Shop Now
+                            শপিং করুন
                         </Link>
                     </div>
                 )}
@@ -126,11 +126,11 @@ export default function OrdersPage({ orders = [] }) {
                                         </span>
                                     </div>
                                     <div className="mt-4 flex items-center justify-between border-t border-dashed border-slate-200 pt-4">
-                                        <span className="text-sm font-bold text-slate-500">Total</span>
+                                        <span className="text-sm font-bold text-slate-500">মোট</span>
                                         <span className="text-xl font-black text-orange-600">{money(order.total_amount)}</span>
                                     </div>
                                     <p className="mt-3 text-xs font-semibold leading-5 text-slate-500">
-                                        Delivery to {order.shipping_snapshot?.address || order.shipping_address}
+                                        ডেলিভারি: {order.shipping_snapshot?.address || order.shipping_address}
                                     </p>
                                 </Link>
                                 <div className="mt-4">
@@ -138,7 +138,7 @@ export default function OrdersPage({ orders = [] }) {
                                 </div>
                                 <div className="mt-3 flex items-center justify-between gap-2">
                                     <Link href={`/orders/${order.id}/tracking`} className="flex items-center gap-2 text-xs font-black text-orange-600 hover:text-orange-700">
-                                        <span>Track order</span>
+                                        <span>ট্র্যাক করুন</span>
                                         <span className="transition-transform duration-200 hover:translate-x-1">→</span>
                                     </Link>
                                     {(['pending', 'confirmed', 'processing'].includes(order.order_status || order.status)) && (
@@ -148,7 +148,7 @@ export default function OrdersPage({ orders = [] }) {
                                             disabled={cancellingOrderId === order.id}
                                             className="rounded-full bg-red-100 px-3 py-1 text-xs font-black text-red-600 transition-all duration-200 hover:bg-red-200 active:scale-95 disabled:opacity-50"
                                         >
-                                            {cancellingOrderId === order.id ? 'Cancelling...' : 'Cancel Order'}
+                                            {cancellingOrderId === order.id ? 'বাতিল হচ্ছে...' : 'অর্ডার বাতিল'}
                                         </button>
                                     )}
                                 </div>

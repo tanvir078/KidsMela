@@ -6,10 +6,10 @@ import SkeletonLoader from '@/Components/Storefront/SkeletonLoader';
 import { getProducts } from '@/services/products';
 
 const sortOptions = [
-    { label: 'Best Match', value: 'match' },
-    { label: 'Low Price', value: 'price-low' },
-    { label: 'High Price', value: 'price-high' },
-    { label: 'Top Rated', value: 'rating' },
+    { label: 'সেরা ম্যাচ', value: 'match' },
+    { label: 'কম দাম', value: 'price-low' },
+    { label: 'বেশি দাম', value: 'price-high' },
+    { label: 'সেরা রেটিং', value: 'rating' },
 ];
 
 function productMatches(product, query, category) {
@@ -97,13 +97,13 @@ export default function SearchPage({ q = '', category = 'All' }) {
                     <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
                     <div className="relative">
                         <p className="text-xs font-black uppercase tracking-[0.2em] text-white/80">
-                            Product finder
+                            পণ্য খুঁজুন
                         </p>
                         <h1 className="mt-2 text-2xl font-black">
-                            {q ? `Results for "${q}"` : 'Browse all products'}
+                            {q ? `"${q}" এর ফলাফল` : 'সব পণ্য ব্রাউজ করুন'}
                         </h1>
                         <p className="mt-1 text-sm font-semibold text-white/90">
-                            Filter by category and sort by price or rating.
+                            ক্যাটাগরি ও দাম অনুযায়ী ফিল্টার করুন
                         </p>
                     </div>
                 </div>
@@ -131,16 +131,16 @@ export default function SearchPage({ q = '', category = 'All' }) {
                     className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:bg-slate-50 active:scale-95"
                 >
                     <span>🔍</span>
-                    {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    {showFilters ? 'ফিল্টার লুকান' : 'ফিল্টার দেখুন'}
                 </button>
 
                 {showFilters && (
                     <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                        <h2 className="text-base font-black text-slate-950 mb-4">Advanced Filters</h2>
+                        <h2 className="text-base font-black text-slate-950 mb-4">আডভান্সড ফিল্টার</h2>
                         
                         <div className="space-y-4">
                             <div>
-                                <label className="mb-2 block text-xs font-bold text-slate-600">Price Range</label>
+                                <label className="mb-2 block text-xs font-bold text-slate-600">মূল্যের পরিসর</label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="number"
@@ -161,7 +161,7 @@ export default function SearchPage({ q = '', category = 'All' }) {
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-xs font-bold text-slate-600">Minimum Rating</label>
+                                <label className="mb-2 block text-xs font-bold text-slate-600">ন্যূনতম রেটিং</label>
                                 <div className="flex gap-2">
                                     {[0, 1, 2, 3, 4, 5].map((rating) => (
                                         <button
@@ -189,7 +189,7 @@ export default function SearchPage({ q = '', category = 'All' }) {
                                     className="h-5 w-5 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                                 />
                                 <label htmlFor="inStock" className="text-sm font-bold text-slate-700">
-                                    In Stock Only
+                                    শুধু স্টকে আছে
                                 </label>
                             </div>
 
@@ -202,7 +202,7 @@ export default function SearchPage({ q = '', category = 'All' }) {
                                 }}
                                 className="w-full rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-600 transition-all duration-200 hover:bg-slate-200 active:scale-95"
                             >
-                                Reset Filters
+                                ফিল্টার রিসেট
                             </button>
                         </div>
                     </div>
@@ -210,7 +210,7 @@ export default function SearchPage({ q = '', category = 'All' }) {
 
                 <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                     <div className="mb-3 flex items-center justify-between">
-                        <h2 className="text-base font-black text-slate-950">Sort by</h2>
+                        <h2 className="text-base font-black text-slate-950">সাজান</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                         {sortOptions.map((option) => (
@@ -232,9 +232,9 @@ export default function SearchPage({ q = '', category = 'All' }) {
 
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-black text-slate-950">Products</h2>
+                        <h2 className="text-lg font-black text-slate-950">পণ্য</h2>
                         <p className="text-xs font-semibold text-slate-500">
-                            {results.length} item{results.length !== 1 ? 's' : ''} found
+                            {results.length}টি পণ্য পাওয়া গেছে
                         </p>
                     </div>
                     <span className="rounded-full bg-gradient-to-r from-orange-100 to-amber-100 px-2.5 py-1 text-xs font-black text-orange-700 ring-1 ring-orange-200">
@@ -257,12 +257,12 @@ export default function SearchPage({ q = '', category = 'All' }) {
                                 <path d="m21 21-4.3-4.3m1.3-5.2a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">No products found</h2>
+                        <h2 className="mt-5 text-xl font-black text-slate-950">কোনো পণ্য পাওয়া যায়নি</h2>
                         <p className="mt-2 text-sm font-semibold text-slate-500">
-                            Try another keyword or browse categories.
+                            অন্য কীওয়ার্ড দিয়ে খুঁজুন বা ক্যাটাগরি দেখুন
                         </p>
                         <Link href="/categories" className="mt-5 inline-flex rounded-2xl bg-orange-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-orange-200">
-                            Browse Categories
+                            ক্যাটাগরি দেখুন
                         </Link>
                     </div>
                 )}

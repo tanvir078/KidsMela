@@ -103,8 +103,8 @@ export default function FlashSale({ products = [] }) {
                         <span className="grid h-6 w-7 place-items-center rounded bg-slate-900 text-[11px] font-bold text-white">{String(seconds).padStart(2, '0')}</span>
                     </div>
                 </div>
-                <Link href="/search" className="text-xs font-semibold text-orange-500">
-                    See All →
+                <Link href="/flash-sale" className="text-xs font-semibold text-orange-500">
+                    সব দেখুন →
                 </Link>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
