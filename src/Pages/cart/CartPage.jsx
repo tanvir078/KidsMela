@@ -8,7 +8,7 @@ import { useToast } from '@/Contexts/ToastContext';
 import { getProducts } from '@/services/products';
 
 function money(value) {
-    return `$${Number(value ?? 0).toFixed(2)}`;
+    return '৳' + Number(value ?? 0).toLocaleString();
 }
 
 export default function CartPage() {
@@ -23,7 +23,7 @@ export default function CartPage() {
         getProducts().then(setRecommendedProducts);
     }, []);
 
-    const delivery = itemCount > 0 ? 4.99 : 0;
+    const delivery = itemCount > 0 ? 60 : 0;
     const discount = calculateDiscount(subtotal);
     const total = subtotal + delivery - discount;
 
@@ -55,8 +55,8 @@ export default function CartPage() {
                     <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
                     <div className="relative flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-black">My Cart</h1>
-                            <p className="mt-1 text-sm font-semibold text-white/90">{itemCount} guest cart items</p>
+                            <h1 className="text-2xl font-black">আমার কার্ট</h1>
+                            <p className="mt-1 text-sm font-semibold text-white/90">{itemCount}টি পণ্য</p>
                         </div>
                         {items.length > 0 && (
                             <button
@@ -79,12 +79,12 @@ export default function CartPage() {
                                 <circle cx="20" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">Your cart is empty</h2>
+                        <h2 className="mt-5 text-xl font-black text-slate-950">আপনার কার্ট খালি</h2>
                         <p className="mt-2 text-sm font-semibold text-slate-500">
-                            Add products from the home screen and they will stay here after refresh.
+                            হোম পেজ থেকে পণ্য যোগ করুন
                         </p>
                         <Link href="/" className="mt-6 inline-flex rounded-2xl bg-orange-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200">
-                            Continue Shopping
+                            শপিং করুন
                         </Link>
                     </div>
                 ) : (
@@ -137,25 +137,25 @@ export default function CartPage() {
                         </div>
 
                         <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <h2 className="text-lg font-black text-slate-950">Order Summary</h2>
+                            <h2 className="text-lg font-black text-slate-950">অর্ডার সারাংশ</h2>
                             <div className="mt-4 space-y-3 text-sm font-bold text-slate-600">
                                 <div className="flex justify-between">
-                                    <span>Subtotal</span>
+                                    <span>সাবটোটাল</span>
                                     <span>{money(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>Delivery preview</span>
+                                    <span>ডেলিভারি চার্জ</span>
                                     <span>{money(delivery)}</span>
                                 </div>
                                 {appliedCoupon && (
                                     <div className="flex justify-between text-emerald-600">
-                                        <span>Discount ({appliedCoupon.description})</span>
+                                        <span>ডিসকাউন্ট ({appliedCoupon.description})</span>
                                         <span>-{money(discount)}</span>
                                     </div>
                                 )}
                                 <div className="border-t border-dashed border-slate-200 pt-3">
                                     <div className="flex justify-between text-lg font-black text-slate-950">
-                                        <span>Total</span>
+                                        <span>মোট</span>
                                         <span>{money(total)}</span>
                                     </div>
                                 </div>
@@ -227,7 +227,7 @@ export default function CartPage() {
                                 href="/checkout"
                                 className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-orange-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95"
                             >
-                                Go to Checkout
+                                চেকআউটে যান
                             </Link>
                         </div>
                     </>
@@ -235,7 +235,7 @@ export default function CartPage() {
 
                 {recommendations.length > 0 && (
                     <div className="space-y-3">
-                        <h2 className="text-lg font-black text-slate-950">You may also like</h2>
+                        <h2 className="text-lg font-black text-slate-950">আপনি পছন্দ করতে পারেন</h2>
                         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             {recommendations.map((product) => (
                                 <ProductCard key={product.id} product={product} />

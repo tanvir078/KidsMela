@@ -24,6 +24,8 @@ import OrderTrackingPage from './Pages/orders/OrderTrackingPage';
 import ProfilePage from './Pages/Profile/ProfilePage';
 import RecentlyViewedPage from './Pages/recently-viewed/RecentlyViewedPage';
 import ComparePage from './Pages/compare/ComparePage';
+import LoginPage from './Pages/auth/LoginPage';
+import RegisterPage from './Pages/auth/RegisterPage';
 import { storefrontApi } from './lib/api';
 import { PageProvider, RouterBridge } from './lib/inertiaCompat';
 
@@ -41,6 +43,8 @@ const routes = [
   { path: '/account', loader: () => Promise.resolve({}), component: ProfilePage },
   { path: '/recently-viewed', loader: () => Promise.resolve({}), component: RecentlyViewedPage },
   { path: '/compare', loader: () => Promise.resolve({}), component: ComparePage },
+  { path: '/login', loader: () => Promise.resolve({}), component: LoginPage },
+  { path: '/register', loader: () => Promise.resolve({}), component: RegisterPage },
 ];
 
 function RouteLoader({ route }) {
