@@ -30,3 +30,4 @@ Set the API base URL in `.env`:
 ```env
 VITE_API_BASE_URL=http://progotix-api.test/api
 ```
+# progotix-ecommerce
