@@ -7,6 +7,8 @@ import { useCurrency } from '@/Contexts/CurrencyContext';
 import { useSearchHistory } from '@/Contexts/SearchHistoryContext';
 import Toast from './Toast';
 import LiveChat from './LiveChat';
+import DesktopHeader from './DesktopHeader';
+import Footer from './Footer';
 import { getProducts } from '@/services/products';
 
 const navItems = [
@@ -100,18 +102,18 @@ export default function MobileShell({ children, title = 'Progotix', showSearch =
 
         router.get('/search', trimmedQuery ? { q: trimmedQuery } : {}, {
             preserveState: false,
-            
         });
-        const location = navigator.geolocation.getCurrentPosition((position) => {
-            console.log(position);
-        });
-        
     };
 
     return (
-        <div className="min-h-screen bg-slate-200 text-slate-950 dark:bg-slate-900 dark:text-slate-50">
-            <div className="mx-auto min-h-screen max-w-md bg-slate-50 shadow-2xl shadow-slate-300/60 dark:bg-slate-800 dark:shadow-slate-900/60">
-                <header className="relative top-0 z-30 h-fit bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 py-3 px-4 text-white shadow-2xl shadow-slate-900/20">
+        <div className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-900 dark:text-slate-50">
+            {/* Desktop Header — visible on lg+ */}
+            <DesktopHeader />
+
+            {/* Mobile shell container — max-w-md on small, full width on lg+ */}
+            <div className="mx-auto min-h-screen max-w-md bg-slate-50 shadow-2xl shadow-slate-300/60 dark:bg-slate-800 dark:shadow-slate-900/60 lg:max-w-none lg:shadow-none">
+                {/* Mobile header — hidden on lg+ */}
+                <header className="relative top-0 z-30 h-fit bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 py-3 px-4 text-white shadow-2xl shadow-slate-900/20 lg:hidden">
                     <div className="flex items-center justify-between gap-3">
                         <Link href="/" className="min-w-0 flex items-center gap-2">
                             <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-xl">
@@ -167,10 +169,9 @@ export default function MobileShell({ children, title = 'Progotix', showSearch =
                    
                 </header>
 
-
-
+                {/* Mobile search bar — hidden on lg+ */}
                 {showSearch && (
-                    <div className="sticky top-0 z-20 w-full">
+                    <div className="sticky top-0 z-20 w-full lg:hidden">
                             <form onSubmit={submitSearch} className="flex items-center h-[50px] gap-2 rounded-2xl bg-gray-100 px-3 py-2 text-slate-500 shadow-inner">
                                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
                                     <path d="m21 21-4.3-4.3m1.3-5.2a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -253,14 +254,14 @@ export default function MobileShell({ children, title = 'Progotix', showSearch =
                         </div>
                         
                     )}
-                      
 
-                   
-                
+                {/* Desktop content wrapper */}
+                <div className="lg:mx-auto lg:max-w-7xl lg:px-6">
+                    <main className="pb-24 lg:pb-8 lg:py-6">{children}</main>
+                </div>
 
-                <main className="pb-24">{children}</main>
-
-                <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-slate-200 bg-white/95 px-2 pb-3 pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.12)] backdrop-blur">
+                {/* Mobile bottom nav — hidden on lg+ */}
+                <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-slate-200 bg-white/95 px-2 pb-3 pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
                     <div className="grid grid-cols-5 gap-1">
                         {navItems.map((item) => {
                             const active = item.match.test(url);
@@ -293,6 +294,9 @@ export default function MobileShell({ children, title = 'Progotix', showSearch =
                 <Toast />
                 <LiveChat />
             </div>
+
+            {/* Desktop Footer — visible on lg+ */}
+            <Footer />
         </div>
     );
 }

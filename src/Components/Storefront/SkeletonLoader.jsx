@@ -1,7 +1,7 @@
 export default function SkeletonLoader({ type = 'card', count = 1 }) {
     if (type === 'card') {
         return (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {Array.from({ length: count }).map((_, i) => (
                     <div key={i} className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
                         <div className="aspect-square bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 animate-pulse" />

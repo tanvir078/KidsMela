@@ -204,7 +204,7 @@ export default function ProductDetailsPage({ productId }) {
                         {recommendations.length > 0 && (
                             <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                                 <h2 className="text-base font-black text-slate-950">You may also like</h2>
-                                <div className="mt-4 grid grid-cols-2 gap-3">
+                                <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
                                     {recommendations.map((recProduct) => (
                                         <ProductCard key={recProduct.id} product={recProduct} />
                                     ))}
@@ -212,7 +212,7 @@ export default function ProductDetailsPage({ productId }) {
                             </div>
                         )}
 
-                        <div className="sticky bottom-20 z-20 rounded-3xl bg-white p-3 shadow-2xl shadow-slate-300 ring-1 ring-slate-200">
+                        <div className="sticky bottom-20 z-20 rounded-3xl bg-white p-3 shadow-2xl shadow-slate-300 ring-1 ring-slate-200 lg:bottom-4">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 items-center rounded-2xl bg-slate-100 px-1">
                                     <button

@@ -177,7 +177,7 @@ export default function HomePage({ banners = [] }) {
 
                 
 
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 gap-3 lg:grid-cols-8">
                     {[
                         { label: 'Flash', icon: '⚡', href: '/search', color: 'from-amber-400 to-orange-500' },
                         { label: 'Fashion', icon: '👗', href: '/search?q=Fashion', color: 'from-pink-400 to-rose-500' },
@@ -376,7 +376,7 @@ export default function HomePage({ banners = [] }) {
                     )}
 
                     {!isLoading && !error && filteredProducts.length > 0 && (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             {filteredProducts.map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}

@@ -236,7 +236,7 @@ export default function CartPage() {
                 {recommendations.length > 0 && (
                     <div className="space-y-3">
                         <h2 className="text-lg font-black text-slate-950">You may also like</h2>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             {recommendations.map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}
