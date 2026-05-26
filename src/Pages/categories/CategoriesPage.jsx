@@ -1,36 +1,43 @@
 import { Head, Link } from '@/lib/inertiaCompat';
 import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import MobileShell from '@/Components/Storefront/MobileShell';
 import ProductCard from '@/Components/Storefront/ProductCard';
 import SkeletonLoader from '@/Components/Storefront/SkeletonLoader';
 import { getProducts } from '@/services/products';
 
 const categoryMeta = {
-    'Electronics': { icon: '📱', gradient: 'from-blue-400 to-indigo-500', bg: 'bg-blue-50' },
-    'Fashion': { icon: '👗', gradient: 'from-pink-400 to-rose-500', bg: 'bg-pink-50' },
-    'Gadgets': { icon: '⚡', gradient: 'from-purple-400 to-fuchsia-500', bg: 'bg-purple-50' },
-    'Sports': { icon: '⚽', gradient: 'from-green-400 to-emerald-500', bg: 'bg-green-50' },
-    'Home': { icon: '🏠', gradient: 'from-amber-400 to-orange-500', bg: 'bg-amber-50' },
-    'Accessories': { icon: '💍', gradient: 'from-rose-400 to-pink-500', bg: 'bg-rose-50' },
-    'Books': { icon: '📚', gradient: 'from-indigo-400 to-blue-500', bg: 'bg-indigo-50' },
-    'Toys': { icon: '🧸', gradient: 'from-cyan-400 to-teal-500', bg: 'bg-cyan-50' },
-    'Food': { icon: '🍔', gradient: 'from-orange-400 to-red-500', bg: 'bg-orange-50' },
-    'Beauty': { icon: '💄', gradient: 'from-fuchsia-400 to-pink-500', bg: 'bg-fuchsia-50' },
+    Electronics: { icon: 'Tech', tone: 'bg-cyan-50 text-cyan-700 ring-cyan-100' },
+    Fashion: { icon: 'Style', tone: 'bg-pink-50 text-pink-700 ring-pink-100' },
+    Gadgets: { icon: 'Gear', tone: 'bg-violet-50 text-violet-700 ring-violet-100' },
+    Sports: { icon: 'Fit', tone: 'bg-emerald-50 text-emerald-700 ring-emerald-100' },
+    Home: { icon: 'Home', tone: 'bg-amber-50 text-amber-700 ring-amber-100' },
+    Accessories: { icon: 'Bag', tone: 'bg-rose-50 text-rose-700 ring-rose-100' },
+    Books: { icon: 'Read', tone: 'bg-indigo-50 text-indigo-700 ring-indigo-100' },
+    Toys: { icon: 'Play', tone: 'bg-sky-50 text-sky-700 ring-sky-100' },
+    Food: { icon: 'Food', tone: 'bg-orange-50 text-orange-700 ring-orange-100' },
+    Beauty: { icon: 'Glow', tone: 'bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-100' },
 };
 
-const defaultMeta = { icon: '📦', gradient: 'from-slate-400 to-slate-500', bg: 'bg-slate-50' };
+const defaultMeta = { icon: 'Item', tone: 'bg-slate-50 text-slate-700 ring-slate-100' };
 
-function money(value) {
+function getMeta(category) {
+    return categoryMeta[category] || defaultMeta;
+}
+
+function price(value) {
     return `$${Number(value ?? 0).toFixed(2)}`;
 }
 
 export default function CategoriesPage() {
+    const { categoryName } = useParams();
     const [products, setProducts] = useState([]);
-    const [activeCategory, setActiveCategory] = useState(null);
+    const [activeCategory, setActiveCategory] = useState(categoryName || '');
     const [isLoading, setIsLoading] = useState(true);
     const [sortBy, setSortBy] = useState('default');
 
     useEffect(() => {
+        setIsLoading(true);
         getProducts()
             .then(setProducts)
             .finally(() => setIsLoading(false));
@@ -38,21 +45,31 @@ export default function CategoriesPage() {
 
     const categoriesWithCount = useMemo(() => {
         const counts = {};
-        products.forEach((p) => {
-            const cat = p.category || 'Other';
-            counts[cat] = (counts[cat] || 0) + 1;
+        products.forEach((product) => {
+            const category = product.category || 'Other';
+            counts[category] = (counts[category] || 0) + 1;
         });
+
         return Object.entries(counts).map(([name, count]) => ({
             name,
             count,
-            ...(categoryMeta[name] || defaultMeta),
+            ...getMeta(name),
         }));
     }, [products]);
 
+    useEffect(() => {
+        if (categoryName) {
+            setActiveCategory(categoryName);
+            return;
+        }
+
+        if (!activeCategory && categoriesWithCount.length > 0) {
+            setActiveCategory(categoriesWithCount[0].name);
+        }
+    }, [activeCategory, categoriesWithCount, categoryName]);
+
     const filteredProducts = useMemo(() => {
-        let list = activeCategory
-            ? products.filter((p) => p.category === activeCategory)
-            : [];
+        let list = activeCategory ? products.filter((product) => (product.category || 'Other') === activeCategory) : [];
 
         if (sortBy === 'price-low') list = [...list].sort((a, b) => Number(a.price) - Number(b.price));
         else if (sortBy === 'price-high') list = [...list].sort((a, b) => Number(b.price) - Number(a.price));
@@ -61,102 +78,129 @@ export default function CategoriesPage() {
         return list;
     }, [activeCategory, products, sortBy]);
 
-    const activeMeta = activeCategory ? (categoryMeta[activeCategory] || defaultMeta) : null;
+    const activeMeta = getMeta(activeCategory);
 
     return (
-        <MobileShell title="Categories">
+        <MobileShell title="Categories" showSearch={false} showPromoBanner={false}>
             <Head title="Categories" />
-            <section className="space-y-4 px-4 py-4">
-                {/* Header */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-orange-200">
-                    <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-                    <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
-                    <div className="relative">
-                        <h1 className="text-2xl font-black">Categories</h1>
-                        <p className="mt-1 text-sm font-semibold text-white/90">
-                            Find products across {categoriesWithCount.length} categories
-                        </p>
+
+            <section className="bg-white lg:hidden">
+                <div className="sticky top-[58px] z-20 flex items-center justify-between bg-[#39d9d0] px-4 py-3 text-slate-900 shadow-sm">
+                    <h1 className="text-sm font-black">Categories</h1>
+                    <div className="flex items-center gap-2">
+                        <Link href="/search" className="grid h-8 w-8 place-items-center rounded bg-white/85 text-slate-700 shadow-sm" aria-label="Search categories">
+                            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                                <path d="m21 21-4.3-4.3m1.3-5.2a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                            </svg>
+                        </Link>
+                        <Link href="/cart" className="grid h-8 w-8 place-items-center rounded bg-white/85 text-slate-700 shadow-sm" aria-label="Cart">
+                            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </Link>
                     </div>
                 </div>
 
-                {/* Category Grid */}
                 {isLoading ? (
-                    <SkeletonLoader type="card" count={6} />
-                ) : !activeCategory ? (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        {categoriesWithCount.map((cat) => (
-                            <button
-                                key={cat.name}
-                                type="button"
-                                onClick={() => setActiveCategory(cat.name)}
-                                className="group overflow-hidden rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:shadow-md hover:ring-orange-200 active:scale-95"
-                            >
-                                <div className={`mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${cat.gradient} text-2xl shadow-sm`}>
-                                    {cat.icon}
-                                </div>
-                                <p className="mt-3 text-center text-sm font-black text-slate-800 group-hover:text-orange-600">{cat.name}</p>
-                                <p className="mt-0.5 text-center text-xs font-semibold text-slate-400">{cat.count} product{cat.count !== 1 ? 's' : ''}</p>
-                            </button>
-                        ))}
+                    <div className="p-3">
+                        <SkeletonLoader type="card" count={6} />
+                    </div>
+                ) : categoriesWithCount.length === 0 ? (
+                    <div className="grid min-h-[55vh] place-items-center px-6 text-center">
+                        <div>
+                            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-400">Empty</div>
+                            <h2 className="mt-3 text-base font-black text-slate-800">No categories found</h2>
+                        </div>
                     </div>
                 ) : (
-                    <>
-                        {/* Active Category Header */}
-                        <div className={`flex items-center gap-3 rounded-2xl ${activeMeta.bg} p-3 ring-1 ring-slate-200`}>
-                            <button type="button" onClick={() => { setActiveCategory(null); setSortBy('default'); }} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-sm font-black text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95">
-                                ←
-                            </button>
-                            <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${activeMeta.gradient} text-xl shadow-sm`}>
-                                {activeMeta.icon}
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-sm font-black text-slate-900">{activeCategory}</p>
-                                <p className="text-xs font-semibold text-slate-500">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}</p>
-                            </div>
-                        </div>
+                    <div className="grid min-h-[calc(100vh-122px)] grid-cols-[88px_minmax(0,1fr)]">
+                        <aside className="border-r border-slate-100 bg-slate-50">
+                            <div className="sticky top-[106px] max-h-[calc(100vh-170px)] overflow-y-auto pb-20 scrollbar-hide">
+                                {categoriesWithCount.map((category) => {
+                                    const active = category.name === activeCategory;
 
-                        {/* Sort Options */}
-                        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                            {[
-                                { value: 'default', label: 'Default' },
-                                { value: 'price-low', label: 'Low Price' },
-                                { value: 'price-high', label: 'High Price' },
-                                { value: 'rating', label: 'Top Rating' },
-                            ].map((opt) => (
-                                <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => setSortBy(opt.value)}
-                                    className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition-all duration-200 ${
-                                        sortBy === opt.value
-                                            ? 'bg-orange-600 text-white shadow-sm'
-                                            : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
-                                    }`}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
+                                    return (
+                                        <button
+                                            key={category.name}
+                                            type="button"
+                                            onClick={() => {
+                                                setActiveCategory(category.name);
+                                                setSortBy('default');
+                                            }}
+                                            className={`relative flex min-h-[66px] w-full flex-col items-center justify-center gap-1 px-2 text-center text-[10px] font-black transition-colors ${
+                                                active ? 'bg-white text-pink-600' : 'text-slate-500'
+                                            }`}
+                                        >
+                                            {active && <span className="absolute left-0 top-2 h-10 w-1 rounded-r bg-pink-500" />}
+                                            <span className={`grid h-8 w-8 place-items-center rounded-full text-[8px] ring-1 ${category.tone}`}>{category.icon}</span>
+                                            <span className="line-clamp-2 leading-3">{category.name}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </aside>
 
-                        {/* Products */}
-                        {filteredProducts.length === 0 ? (
-                            <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-8 text-center shadow-sm ring-1 ring-slate-200">
-                                <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-slate-200 text-3xl">
-                                    {activeMeta.icon}
+                        <div className="min-w-0 bg-white px-3 pb-24 pt-3">
+                            <div className="mb-3 flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-sm font-black text-slate-900">{activeCategory}</h2>
+                                    <p className="text-[11px] font-semibold text-slate-400">{filteredProducts.length} items</p>
                                 </div>
-                                <h2 className="mt-4 text-lg font-black text-slate-950">No products in this category</h2>
-                                <button type="button" onClick={() => setActiveCategory(null)} className="mt-4 rounded-2xl bg-orange-600 px-5 py-2.5 text-sm font-black text-white transition-all hover:bg-orange-700 active:scale-95">
-                                    View All Categories
-                                </button>
+                                <select
+                                    value={sortBy}
+                                    onChange={(event) => setSortBy(event.target.value)}
+                                    className="h-8 rounded border border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-300"
+                                >
+                                    <option value="default">Default</option>
+                                    <option value="price-low">Low Price</option>
+                                    <option value="price-high">High Price</option>
+                                    <option value="rating">Top Rating</option>
+                                </select>
                             </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                                {filteredProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} />
-                                ))}
-                            </div>
-                        )}
-                    </>
+
+                            {filteredProducts.length === 0 ? (
+                                <div className="rounded bg-slate-50 p-6 text-center">
+                                    <div className={`mx-auto grid h-14 w-14 place-items-center rounded-full text-[10px] font-black ring-1 ${activeMeta.tone}`}>{activeMeta.icon}</div>
+                                    <p className="mt-3 text-sm font-black text-slate-700">No products in this category</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-3 gap-x-3 gap-y-5">
+                                    {filteredProducts.map((product) => (
+                                        <Link key={product.id} href={`/products/${product.id}`} className="min-w-0 text-center">
+                                            <div className="mx-auto aspect-square w-full overflow-hidden rounded bg-slate-50 ring-1 ring-slate-100">
+                                                {product.image_url ? (
+                                                    <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+                                                ) : (
+                                                    <div className={`grid h-full place-items-center text-[9px] font-black ${activeMeta.tone}`}>{activeMeta.icon}</div>
+                                                )}
+                                            </div>
+                                            <p className="mt-1 line-clamp-2 min-h-[28px] text-[10px] font-semibold leading-[14px] text-slate-600">{product.name}</p>
+                                            <p className="text-[10px] font-black text-pink-600">{price(product.price)}</p>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </section>
+
+            <section className="hidden space-y-4 px-4 py-4 lg:block">
+                <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                    <h1 className="text-2xl font-black text-slate-900">Categories</h1>
+                    <p className="mt-1 text-sm font-semibold text-slate-500">
+                        Find products across {categoriesWithCount.length} categories
+                    </p>
+                </div>
+
+                {isLoading ? (
+                    <SkeletonLoader type="card" count={6} />
+                ) : (
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                        {(activeCategory ? filteredProducts : products).map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
                 )}
             </section>
         </MobileShell>

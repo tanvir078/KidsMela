@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/lib/inertiaCompat';
-import { useCart } from '@/Contexts/CartContext';
 
 function getFlashSaleEndTime() {
     const now = new Date();
@@ -34,7 +33,6 @@ function useCountdown(endDate) {
 }
 
 function FlashProductCard({ product }) {
-    const { addItem } = useCart();
     const discount = product.compare_price
         ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
         : Math.floor(Math.random() * 30) + 10;
@@ -43,10 +41,10 @@ function FlashProductCard({ product }) {
     const soldPercent = Math.min(95, Math.max(30, 100 - stock * 5));
 
     return (
-        <div className="w-[140px] shrink-0 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
+        <div className="w-[128px] shrink-0 overflow-hidden rounded-sm bg-white shadow-sm ring-1 ring-slate-100">
             <Link href={`/products/${product.id}`} className="block">
-                <div className="relative aspect-square bg-gray-50">
-                    <span className="absolute left-1.5 top-1.5 z-10 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                <div className="relative aspect-square bg-slate-50">
+                    <span className="absolute left-0 top-2 z-10 rounded-r bg-pink-500 px-1.5 py-0.5 text-[10px] font-black text-white">
                         -{discount}%
                     </span>
                     {product.image_url ? (
@@ -54,25 +52,25 @@ function FlashProductCard({ product }) {
                     ) : (
                         <div className="grid h-full place-items-center">
                             <div className="text-center">
-                                <svg viewBox="0 0 24 24" className="mx-auto h-8 w-8 text-gray-200" fill="none"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                <svg viewBox="0 0 24 24" className="mx-auto h-8 w-8 text-slate-200" fill="none"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             </div>
                         </div>
                     )}
                 </div>
                 <div className="p-2">
-                    <p className="line-clamp-1 text-xs font-medium text-gray-800">{product.name}</p>
+                    <p className="line-clamp-2 min-h-[30px] text-[11px] font-semibold leading-[15px] text-slate-700">{product.name}</p>
                     <div className="mt-1 flex items-baseline gap-1.5">
-                        <span className="text-sm font-bold text-orange-600">${Number(product.price).toFixed(2)}</span>
-                        <span className="text-[10px] text-gray-400 line-through">${Number(originalPrice).toFixed(2)}</span>
+                        <span className="text-sm font-black text-pink-600">${Number(product.price).toFixed(2)}</span>
+                        <span className="text-[10px] text-slate-400 line-through">${Number(originalPrice).toFixed(2)}</span>
                     </div>
                     <div className="mt-1.5">
-                        <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-500 transition-all duration-500"
+                                className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-pink-500 transition-all duration-500"
                                 style={{ width: `${soldPercent}%` }}
                             />
                         </div>
-                        <p className="mt-0.5 text-[9px] font-medium text-gray-400">{soldPercent}% sold</p>
+                        <p className="mt-0.5 text-[9px] font-bold text-slate-400">{soldPercent}% sold</p>
                     </div>
                 </div>
             </Link>
@@ -89,28 +87,28 @@ export default function FlashSale({ products = [] }) {
 
     return (
         <div className="lg:hidden">
-            <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+            <div className="overflow-hidden rounded-sm bg-[#063c6f] shadow-sm">
+                <div className="flex h-9 items-center justify-between px-2.5 text-white">
                     <div className="flex items-center gap-1.5">
-                        <svg viewBox="0 0 24 24" className="h-5 w-5 text-orange-500" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        <h2 className="text-base font-bold text-slate-900">Flash Sale</h2>
+                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-yellow-300" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <h2 className="text-sm font-black uppercase">Flash Sale</h2>
                     </div>
                     <div className="flex items-center gap-1">
-                        <span className="grid h-6 w-7 place-items-center rounded bg-slate-900 text-[11px] font-bold text-white">{String(hours).padStart(2, '0')}</span>
-                        <span className="text-xs font-bold text-slate-900">:</span>
-                        <span className="grid h-6 w-7 place-items-center rounded bg-slate-900 text-[11px] font-bold text-white">{String(minutes).padStart(2, '0')}</span>
-                        <span className="text-xs font-bold text-slate-900">:</span>
-                        <span className="grid h-6 w-7 place-items-center rounded bg-slate-900 text-[11px] font-bold text-white">{String(seconds).padStart(2, '0')}</span>
+                        <span className="grid h-6 min-w-6 place-items-center rounded-sm bg-slate-950 px-1 text-[11px] font-black text-white">{String(hours).padStart(2, '0')}</span>
+                        <span className="text-xs font-black text-white">:</span>
+                        <span className="grid h-6 min-w-6 place-items-center rounded-sm bg-slate-950 px-1 text-[11px] font-black text-white">{String(minutes).padStart(2, '0')}</span>
+                        <span className="text-xs font-black text-white">:</span>
+                        <span className="grid h-6 min-w-6 place-items-center rounded-sm bg-slate-950 px-1 text-[11px] font-black text-white">{String(seconds).padStart(2, '0')}</span>
                     </div>
+                    <Link href="/flash-sale" className="text-[10px] font-black text-cyan-100">
+                        View All
+                    </Link>
                 </div>
-                <Link href="/flash-sale" className="text-xs font-semibold text-orange-500">
-                    View All →
-                </Link>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                {flashProducts.map((product) => (
-                    <FlashProductCard key={product.id} product={product} />
-                ))}
+                <div className="flex gap-2 overflow-x-auto bg-white p-2 scrollbar-hide">
+                    {flashProducts.map((product) => (
+                        <FlashProductCard key={product.id} product={product} />
+                    ))}
+                </div>
             </div>
         </div>
     );

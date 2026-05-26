@@ -13,6 +13,9 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5174,
     strictPort: true,
-    allowedHosts: ['progotix-ecommerce.test', 'localhost', '127.0.0.1'],
+    https: false,
+    allowedHosts: ['progotix-ecommerce.test', 'localhost', '127.0.0.1',],
   },
 });
+
+

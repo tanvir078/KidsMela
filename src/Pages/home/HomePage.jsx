@@ -12,47 +12,19 @@ import Newsletter from '@/Components/Storefront/Newsletter';
 
 
 export default function HomePage({ banners = [] }) {
+    const [offercategories, setOfferCategories] = useState([]);
     const [products, setProducts] = useState([]);
     const [activeCategory, setActiveCategory] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [sortBy, setSortBy] = useState('default');
-    const [showFilters, setShowFilters] = useState(false);
-    const [currentBanner, setCurrentBanner] = useState(0);
 
-    const bannerList = banners.length > 0 ? banners : [
-        {
-            title: 'Mega Sale 🔥',
-            subtitle: 'Up to 50% off on trending products',
-            gradient: 'from-orange-500 via-rose-500 to-fuchsia-500',
-            cta: 'Shop Now',
-            link: '/search',
-        },
-        {
-            title: 'New Arrivals ✨',
-            subtitle: 'Discover the latest fashion & gadgets',
-            gradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
-            cta: 'Explore',
-            link: '/categories',
-        },
-        {
-            title: 'Free Delivery 🚚',
-            subtitle: 'On orders above $50',
-            gradient: 'from-emerald-500 via-teal-500 to-cyan-500',
-            cta: 'Order Now',
-            link: '/search',
-        },
-    ];
-
-    const CATEGORIES = [
-        { label: 'All', icon: '🏪', color: 'from-gray-500 to-gray-600' },
-        { label: 'Flash', icon: '⚡', color: 'from-amber-400 to-orange-500' },
-        { label: 'Fashion', icon: '👗', color: 'from-pink-400 to-rose-500' },
-        { label: 'Electronics', icon: '📱', color: 'from-blue-400 to-indigo-500' },
-        { label: 'Sports', icon: '⚽', color: 'from-green-400 to-emerald-500' },
-        { label: 'Beauty', icon: '💄', color: 'from-fuchsia-400 to-pink-500' },
-        { label: 'Home', icon: '🏠', color: 'from-amber-400 to-yellow-500' },
-        { label: 'Books', icon: '📚', color: 'from-indigo-400 to-purple-500' },
+    const trustFeatures = [
+        { label: 'Lowest Price', badge: 'Short' },
+        { label: 'Fast Delivery', badge: 'FAST' },
+        { label: '100% Authentic', badge: 'OK' },
+        { label: 'Cashback', badge: 'CASH' },
+        { label: 'Latest Drops', badge: 'NEW' },
     ];
 
     const loadProducts = async () => {
@@ -71,17 +43,18 @@ export default function HomePage({ banners = [] }) {
         loadProducts();
     }, []);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentBanner((prev) => (prev + 1) % bannerList.length);
-        }, 4000);
-        return () => clearInterval(interval);
-    }, [bannerList.length]);
+    const offerCategories = useMemo(() => {
+        const names = offercategories.map((offer) => offer.category).filter(Boolean);
+        return [...new Set(names)];
+    }, [offercategories]);
+
 
     const categories = useMemo(() => {
         const names = products.map((product) => product.category).filter(Boolean);
         return ['All', ...Array.from(new Set(names))];
     }, [products]);
+
+    const dealProducts = useMemo(() => products.slice(0, 6), [products]);
 
     const filteredProducts = useMemo(() => {
         let result = activeCategory === 'All' ? products : products.filter((product) => product.category === activeCategory);
@@ -100,66 +73,68 @@ export default function HomePage({ banners = [] }) {
     }, [activeCategory, products, sortBy]);
 
     return (
-        <MobileShell>
+        <MobileShell banners={banners} contentOverBanner>
             <Head title="Home" />
 
-            <div className="space-y-5 px-4 py-3">
-                {/* Banner Carousel */}
-                <div className="relative overflow-hidden rounded-2xl shadow-md" style={{ minHeight: '140px' }}>
-                    {bannerList.map((banner, index) => (
-                        <div
-                            key={index}
-                            className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                                index === currentBanner ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-                            }`}
-                        >
-                            <div className={`flex h-full min-h-[140px] items-center bg-gradient-to-r ${banner.gradient} p-5`}>
-                                <div className="relative z-10 flex-1">
-                                    <h2 className="text-xl font-extrabold text-white leading-tight">{banner.title}</h2>
-                                    <p className="mt-1 text-[13px] font-medium text-white/90">{banner.subtitle}</p>
-                                    <Link
-                                        href={banner.link || '/search'}
-                                        className="mt-3 inline-flex h-8 items-center rounded-full bg-white px-4 text-xs font-bold text-gray-800 shadow-sm transition-all active:scale-95"
-                                    >
-                                        {banner.cta || 'Shop Now'}
-                                    </Link>
+            <div className="top-0 z-50 space-y-4 px-2 py-2 bg-[#f1f5cb] lg:px-0 lg:py-0">
+                <div className="lg:hidden">
+                    <div className="flex gap-2 overflow-y-auto pb-1 scrollbar-hide">
+                        {(dealProducts.length > 0 ? dealProducts : [null, null, null]).map((product, index) => (
+                            <Link
+                                key={product?.id || index}
+                                href={product ? `/products/${product.id}` : '/search'}
+                                className="flex w-[150px] shrink-0 flex-col overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-slate-100"
+                            >
+                                <div className="flex h-[130px] overflow-hidden rounded-t-md bg-slate-200 cyan-50">
+                                    {product?.image_url ? (
+                                        <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+                                    ) : (
+                                        <div className="grid h-full place-items-center px-2 text-center text-xs font-black text-cyan-700">
+                                            FREE DELIVERY
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/10" />
-                                <div className="absolute -bottom-4 -right-2 h-20 w-20 rounded-full bg-white/10" />
-                            </div>
-                        </div>
-                    ))}
-                    {/* Dots */}
-                    <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
-                        {bannerList.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentBanner(index)}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
-                                    index === currentBanner ? 'w-5 bg-white' : 'w-1.5 bg-white/50'
-                                }`}
-                            />
+
+
+                                <div className="flex flex-col p-1 items-center">
+                                    <div className="flex flex-col items-center">
+                                        <p className="text-[11px] text-semibold h-10  leading-2 text-black-500">
+                                        {product?.name || ['Selected Store Only', 'Fresh Deals', 'Unbeatable Price'][index] || 'Hot Deal'}
+                                      
+                                     </p> 
+                                     </div>
+                                       {product &&
+                                     
+                                             <div className="flex items-center">
+                                                  <p className="text-xs font-black text-pink-600">${Number(product.price).toFixed(2)}
+                                                  </p>
+                                            </div>
+                                      }    
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
 
-                {/* Category Icons - horizontal scroll */}
                 <div className="lg:hidden">
-                    <div className="flex gap-4 overflow-x-auto pb-1 scrollbar-hide">
-                        {CATEGORIES.map((cat) => (
-                            <button
-                                key={cat.label}
-                                type="button"
-                                onClick={() => setActiveCategory(cat.label === 'Flash' ? 'All' : cat.label)}
-                                className="flex shrink-0 flex-col items-center gap-1.5"
-                            >
-                                <div className={`grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br ${cat.color} text-lg shadow-sm transition-transform active:scale-90 ${
-                                    (cat.label === activeCategory || (cat.label === 'Flash' && activeCategory === 'All')) ? 'ring-2 ring-orange-400 ring-offset-2' : ''
-                                }`}>
-                                    {cat.icon}
+                    <div className="grid grid-cols-5 gap-1.5">
+                        {offerCategories.map((category) => (
+                            <div key={category} className="flex flex-col items-center bg-slate-200 rounded-lg">
+                                <div className="mx-auto grid h-10 w-10 place-items-center rounded bg-cyan-50 text-[9px] font-black text-cyan-700 ring-1 ring-cyan-100">
+                                    {category}
                                 </div>
-                                <span className="text-[10px] font-semibold text-gray-600">{cat.label}</span>
-                            </button>
+                                <p className="mt-1 text-[9px] font-semibold leading-3 text-slate-500">{category}</p>
+                            </div>
+                        ))}
+
+                        
+                        {trustFeatures.map((feature) => (
+                            <div key={feature.label} className="flex flex-col items-center bg-slate-200 rounded-lg">
+                                <div className="mx-auto grid h-10 w-10 place-items-center rounded bg-cyan-50 text-[9px] font-black text-cyan-700 ring-1 ring-cyan-100">
+                                    {feature.badge}
+                                </div>
+                                <p className="mt-1 text-[9px] font-semibold leading-3 text-slate-500">{feature.label}</p>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -184,79 +159,58 @@ export default function HomePage({ banners = [] }) {
                     </div>
                 </div>
 
+
+
                 {/* Flash Sale Section */}
                 <FlashSale products={products} />
 
                 {/* Trending Products */}
-                <TrendingProducts products={products} />
+                <div className="hidden lg:block">
+                    <TrendingProducts products={products} />
+                </div>
 
-                {/* All Products Section */}
+                {/* Recommended Products */}
+                <div className="relative item center pt-3 pb-4 gap-4">
+                    <div className="flex grid-cols-2 items-center justify-between gap-4">
+                        <div>
+                        <h2 className="text-base font-bold px-2 text-slate-900">
+                            Recommended Products
+                        </h2>
+                        </div>
+                        <div>
+                        <span className="text-xs px-2 text-gray-500">View All</span>
+                        </div>
+                    </div>
+                
+
+                    <div className="flex items-center justify-between pt-3">
+                        <div>
+                            <h2 className="text-base font-bold text-slate-900">
+                                {activeCategory === 'All' ? '' : activeCategory}
+                            </h2>
+                          
+
+                        </div>
+                    </div>
+                </div>
+                
+
+
+                {/* Products */}
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-base font-bold text-slate-900">
-                                {activeCategory === 'All' ? 'All Products' : activeCategory}
+                            <h2 className="text-base px-2 font-bold text-slate-900">
+                                {activeCategory === 'All' ? 'Deals you cannot miss' : activeCategory}
                             </h2>
-                            <p className="text-xs text-gray-400">
-                                {filteredProducts.length} items
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all active:scale-95 ${
-                                    showFilters ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'
-                                }`}
-                            >
-                                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none"><path d="M3 4h18M3 12h12M3 20h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-                                Filter
-                            </button>
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="h-8 rounded-lg border-gray-200 bg-gray-100 px-2 text-[11px] font-semibold text-gray-600 focus:border-orange-400 focus:ring-orange-400"
-                            >
-                                <option value="default">Sort</option>
-                                <option value="price-low">Price: Low→High</option>
-                                <option value="price-high">Price: High→Low</option>
-                                <option value="rating">Top Rated</option>
-                                <option value="name">Name A-Z</option>
-                            </select>
+
                         </div>
                     </div>
 
-                    {/* Filter panel */}
-                    {showFilters && (
-                        <div className="animate-slide-down rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-100">
-                            <div className="mb-3 flex items-center justify-between">
-                                <p className="text-xs font-bold text-gray-700">Filter by category</p>
-                                <button
-                                    type="button"
-                                    onClick={() => { setActiveCategory('All'); setShowFilters(false); }}
-                                    className="text-[11px] font-semibold text-orange-500"
-                                >
-                                    Reset
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {categories.map((category) => (
-                                    <button
-                                        key={category}
-                                        type="button"
-                                        onClick={() => { setActiveCategory(category); setShowFilters(false); }}
-                                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-all active:scale-95 ${
-                                            activeCategory === category
-                                                ? 'bg-orange-500 text-white'
-                                                : 'bg-gray-50 text-gray-600 ring-1 ring-gray-200'
-                                        }`}
-                                    >
-                                        {category}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+
+
+
+
 
                     {/* Loading */}
                     {isLoading && <SkeletonLoader type="card" count={4} />}
@@ -307,13 +261,19 @@ export default function HomePage({ banners = [] }) {
                 </div>
 
                 {/* Bundle Deals */}
-                <BundleDeals products={products} />
+                <div className="hidden lg:block">
+                    <BundleDeals products={products} />
+                </div>
 
                 {/* Recently Viewed */}
-                <RecentlyViewed />
+                <div className="hidden lg:block">
+                    <RecentlyViewed />
+                </div>
 
                 {/* Newsletter */}
-                <Newsletter />
+                <div className="hidden lg:block">
+                    <Newsletter />
+                </div>
             </div>
         </MobileShell>
     );

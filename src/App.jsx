@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import ErrorBoundary from './Components/Storefront/ErrorBoundary';
 import { CartProvider } from './Contexts/CartContext';
 import { WishlistProvider } from './Contexts/WishlistContext';
@@ -53,6 +53,8 @@ const routes = [
   { path: '/settings/language', loader: () => Promise.resolve({}), component: LanguageSelectPage },
   { path: '/settings/currency', loader: () => Promise.resolve({}), component: CurrencySelectPage },
 ];
+
+const AppRouter = import.meta.env.PROD ? HashRouter : BrowserRouter;
 
 function RouteLoader({ route }) {
   const location = useLocation();
@@ -117,7 +119,7 @@ function Providers({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <AppRouter>
       <Providers>
         <Routes>
           {routes.map((route) => (
@@ -126,6 +128,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Providers>
-    </BrowserRouter>
+    </AppRouter>
   );
 }
