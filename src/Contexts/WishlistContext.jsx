@@ -10,7 +10,8 @@ function readStoredWishlist() {
 
     try {
         return JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '[]');
-    } catch {
+    } catch (error) {
+        console.error('Failed to load wishlist from localStorage:', error);
         return [];
     }
 }
@@ -27,6 +28,24 @@ function normalizeProduct(product) {
         rating: product.rating,
         reviews_count: product.reviews_count,
     };
+}
+
+async function trackAnalytics(eventType, productId, metadata = {}) {
+    try {
+        await fetch('/api/storefront/analytics/track', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_type: eventType,
+                product_id: productId,
+                metadata,
+            }),
+        });
+    } catch (error) {
+        console.error('Failed to track analytics:', error);
+    }
 }
 
 export function WishlistProvider({ children }) {
@@ -49,10 +68,16 @@ export function WishlistProvider({ children }) {
                 ? currentItems
                 : [safeProduct, ...currentItems],
         );
+        
+        // Track analytics
+        trackAnalytics('wishlist_add', product.id);
     }, []);
 
     const removeItem = useCallback((productId) => {
         setItems((currentItems) => currentItems.filter((item) => item.id !== productId));
+        
+        // Track analytics
+        trackAnalytics('remove_from_wishlist', productId);
     }, []);
 
     const toggleItem = useCallback(

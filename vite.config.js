@@ -16,6 +16,20 @@ export default defineConfig({
     https: false,
     allowedHosts: ['progotix-ecommerce.test', 'localhost', '127.0.0.1',],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router-dom/')) {
+            return 'react';
+          }
+          if (id.includes('/swiper/')) {
+            return 'swiper';
+          }
+          return 'vendor';
+        },
+      },
+    },
+  },
 });
-
-

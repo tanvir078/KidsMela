@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useCurrency } from '@/Contexts/CurrencyContext';
 
 export default function StripePayment({ amount, onPaymentSuccess, onPaymentError }) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [cardNumber, setCardNumber] = useState('');
     const [expiry, setExpiry] = useState('');
     const [cvc, setCvc] = useState('');
+    const { formatMoney } = useCurrency();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -78,7 +80,7 @@ export default function StripePayment({ amount, onPaymentSuccess, onPaymentError
                     disabled={isProcessing}
                     className="mt-2 h-12 w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-sm font-black text-white shadow-lg shadow-indigo-200 transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 active:scale-95 disabled:opacity-50"
                 >
-                    {isProcessing ? 'Processing...' : `Pay $${amount.toFixed(2)}`}
+                    {isProcessing ? 'Processing...' : `Pay ${formatMoney(amount)}`}
                 </button>
 
                 <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">

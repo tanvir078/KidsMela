@@ -13,7 +13,7 @@ export function usePage() {
 }
 
 export function Head({ title }) {
-  if (title) document.title = `${title} - ${import.meta.env.VITE_STORE_NAME || 'Progotix'}`;
+  if (title) document.title = `${title} - ${import.meta.env.VITE_STORE_NAME || 'Kids Mela'}`;
   return null;
 }
 

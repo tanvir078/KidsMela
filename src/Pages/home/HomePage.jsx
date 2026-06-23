@@ -2,6 +2,7 @@ import { Head, Link } from '@/lib/inertiaCompat';
 import { useEffect, useMemo, useState } from 'react';
 import MobileShell from '@/Components/Storefront/MobileShell';
 import ProductCard from '@/Components/Storefront/ProductCard';
+import ProductBundleCard from '@/Components/Storefront/ProductBundleCard';
 import SkeletonLoader from '@/Components/Storefront/SkeletonLoader';
 import { getProducts } from '@/services/products';
 import FlashSale from '@/Components/Storefront/FlashSale';
@@ -9,22 +10,48 @@ import TrendingProducts from '@/Components/Storefront/TrendingProducts';
 import BundleDeals from '@/Components/Storefront/BundleDeals';
 import RecentlyViewed from '@/Components/Storefront/RecentlyViewed';
 import Newsletter from '@/Components/Storefront/Newsletter';
+import { apiRequest } from '@/lib/api';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 
-export default function HomePage({ banners = [] }) {
+export default function HomePage({ banners: propBanners = [] }) {
+    const [banners, setBanners] = useState(propBanners);
     const [offercategories, setOfferCategories] = useState([]);
     const [products, setProducts] = useState([]);
+    const [bundles, setBundles] = useState([]);
     const [activeCategory, setActiveCategory] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [sortBy, setSortBy] = useState('default');
 
+    const loadBanners = async () => {
+        try {
+            const data = await storefrontApi.banners();
+            const activeBanners = data.banners?.filter(b => b.active && (b.device_type === 'both' || b.device_type === 'desktop')) || [];
+            setBanners(activeBanners);
+        } catch (error) {
+            console.error('Failed to load banners:', error);
+            // Use fallback banners if API fails
+            setBanners(propBanners);
+        }
+    };
+
     const trustFeatures = [
-        { label: 'Lowest Price', badge: 'Short' },
+        { label: 'Best Price', badge: 'BEST' },
         { label: 'Fast Delivery', badge: 'FAST' },
-        { label: '100% Authentic', badge: 'OK' },
-        { label: 'Cashback', badge: 'CASH' },
+        { label: 'Premium Fabric', badge: 'FAB' },
+        { label: 'Easy Exchange', badge: 'EX' },
         { label: 'Latest Drops', badge: 'NEW' },
+    ];
+
+    const fashionCollections = [
+        { label: "Men's Edit", href: '/search?category=Men', image: '/banners/kids-mela-men-edit.svg', tone: 'from-slate-950/75 to-slate-950/10' },
+        { label: "Women's Collection", href: '/search?category=Women', image: '/banners/kids-mela-women-collection.svg', tone: 'from-rose-950/70 to-rose-900/10' },
+        { label: 'Shoes & Bags', href: '/search?category=Accessories', image: '/banners/kids-mela-shoes-bags.svg', tone: 'from-fuchsia-950/70 to-fuchsia-900/10' },
     ];
 
     const loadProducts = async () => {
@@ -39,8 +66,19 @@ export default function HomePage({ banners = [] }) {
         }
     };
 
+    const loadBundles = async () => {
+        try {
+            const data = await apiRequest('/storefront/bundles');
+            setBundles(data.data || []);
+        } catch (exception) {
+            console.error('Failed to load bundles:', exception);
+        }
+    };
+
     useEffect(() => {
         loadProducts();
+        loadBundles();
+        loadBanners();
     }, []);
 
     const offerCategories = useMemo(() => {
@@ -76,40 +114,98 @@ export default function HomePage({ banners = [] }) {
         <MobileShell banners={banners} contentOverBanner>
             <Head title="Home" />
 
-            <div className="top-0 z-50 space-y-4 px-2 py-2 bg-[#f1f5cb] lg:px-0 lg:py-0">
+            <div className="space-y-4 bg-gradient-to-b from-slate-50 to-white px-2 py-2 lg:space-y-6 lg:bg-transparent lg:px-0 lg:py-0">
+                {/* Desktop Slide Banners */}
+                <section className="hidden lg:block overflow-hidden rounded-md bg-slate-950 text-white">
+                    <Swiper
+                        modules={[Autoplay, Pagination, Navigation]}
+                        autoplay={{ delay: 4000, disableOnInteraction: false }}
+                        pagination={{ clickable: true }}
+                        navigation={true}
+                        loop={banners.length > 1}
+                        className="min-h-[400px]"
+                    >
+                        {banners.map((banner) => (
+                            <SwiperSlide key={banner.id}>
+                                <Link href={banner.link || '/search'} className="block h-full">
+                                    <div className="relative h-[400px]">
+                                        {banner.image_url ? (
+                                            <img
+                                                src={banner.image_url}
+                                                alt={banner.image_alt || banner.title}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className={`h-full w-full bg-gradient-to-r ${banner.gradient || 'from-orange-500 via-rose-500 to-fuchsia-600'}`}>
+                                                <div className="flex h-full items-center justify-center px-20">
+                                                    <div className="text-center">
+                                                        <p className="text-sm font-black uppercase tracking-[0.28em] text-rose-300">
+                                                            {banner.discount || 'Special Offer'}
+                                                        </p>
+                                                        <h2 className="mt-4 text-4xl font-black leading-tight">
+                                                            {banner.title}
+                                                        </h2>
+                                                        {banner.description && (
+                                                            <p className="mt-4 max-w-lg text-sm font-semibold leading-6 text-slate-300">
+                                                                {banner.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent" />
+                                    </div>
+                                </Link>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </section>
+
+                <section className="hidden grid-cols-3 gap-4 lg:grid">
+                    {fashionCollections.map((collection) => (
+                        <Link key={collection.label} href={collection.href} className="group relative h-[180px] overflow-hidden rounded-md bg-slate-900">
+                            <img src={collection.image} alt={collection.label} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                            <div className={`absolute inset-0 bg-gradient-to-t ${collection.tone}`} />
+                            <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                                <p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Collection</p>
+                                <h2 className="mt-1 text-xl font-black">{collection.label}</h2>
+                            </div>
+                        </Link>
+                    ))}
+                </section>
+
                 <div className="lg:hidden">
-                    <div className="flex gap-2 overflow-y-auto pb-1 scrollbar-hide">
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                         {(dealProducts.length > 0 ? dealProducts : [null, null, null]).map((product, index) => (
                             <Link
                                 key={product?.id || index}
                                 href={product ? `/products/${product.id}` : '/search'}
-                                className="flex w-[150px] shrink-0 flex-col overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-slate-100"
+                                className="flex w-[140px] shrink-0 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:shadow-md hover:ring-slate-300"
                             >
-                                <div className="flex h-[130px] overflow-hidden rounded-t-md bg-slate-200 cyan-50">
+                                <div className="relative h-[140px] overflow-hidden rounded-t-2xl bg-gradient-to-br from-orange-50 to-rose-50">
                                     {product?.image_url ? (
-                                        <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+                                        <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" />
                                     ) : (
-                                        <div className="grid h-full place-items-center px-2 text-center text-xs font-black text-cyan-700">
+                                        <div className="grid h-full place-items-center px-2 text-center text-xs font-black text-orange-700">
                                             FREE DELIVERY
                                         </div>
                                     )}
+                                    {!product && (
+                                        <div className="absolute top-2 right-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-black text-white">
+                                            HOT
+                                        </div>
+                                    )}
                                 </div>
-
-
-                                <div className="flex flex-col p-1 items-center">
-                                    <div className="flex flex-col items-center">
-                                        <p className="text-[11px] text-semibold h-10  leading-2 text-black-500">
+                                <div className="flex flex-col p-3">
+                                    <p className="line-clamp-2 text-xs font-semibold leading-tight text-slate-800">
                                         {product?.name || ['Selected Store Only', 'Fresh Deals', 'Unbeatable Price'][index] || 'Hot Deal'}
-                                      
-                                     </p> 
-                                     </div>
-                                       {product &&
-                                     
-                                             <div className="flex items-center">
-                                                  <p className="text-xs font-black text-pink-600">${Number(product.price).toFixed(2)}
-                                                  </p>
-                                            </div>
-                                      }    
+                                    </p>
+                                    {product && (
+                                        <div className="mt-2 flex items-center justify-between">
+                                            <p className="text-sm font-black text-rose-600">${Number(product.price).toFixed(2)}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </Link>
                         ))}
@@ -117,23 +213,22 @@ export default function HomePage({ banners = [] }) {
                 </div>
 
                 <div className="lg:hidden">
-                    <div className="grid grid-cols-5 gap-1.5">
+                    <div className="grid grid-cols-5 gap-2">
                         {offerCategories.map((category) => (
-                            <div key={category} className="flex flex-col items-center bg-slate-200 rounded-lg">
-                                <div className="mx-auto grid h-10 w-10 place-items-center rounded bg-cyan-50 text-[9px] font-black text-cyan-700 ring-1 ring-cyan-100">
-                                    {category}
+                            <div key={category} className="flex flex-col items-center rounded-2xl bg-gradient-to-br from-orange-50 to-rose-50 p-2 shadow-sm ring-1 ring-orange-100">
+                                <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-white text-[9px] font-black text-orange-600 shadow-sm ring-1 ring-orange-200">
+                                    {category.charAt(0)}
                                 </div>
-                                <p className="mt-1 text-[9px] font-semibold leading-3 text-slate-500">{category}</p>
+                                <p className="mt-1 text-[9px] font-semibold leading-3 text-slate-700">{category}</p>
                             </div>
                         ))}
 
-                        
                         {trustFeatures.map((feature) => (
-                            <div key={feature.label} className="flex flex-col items-center bg-slate-200 rounded-lg">
-                                <div className="mx-auto grid h-10 w-10 place-items-center rounded bg-cyan-50 text-[9px] font-black text-cyan-700 ring-1 ring-cyan-100">
+                            <div key={feature.label} className="flex flex-col items-center rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 p-2 shadow-sm ring-1 ring-emerald-100">
+                                <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-white text-[9px] font-black text-emerald-600 shadow-sm ring-1 ring-emerald-200" role="img" aria-label={feature.label}>
                                     {feature.badge}
                                 </div>
-                                <p className="mt-1 text-[9px] font-semibold leading-3 text-slate-500">{feature.label}</p>
+                                <p className="mt-1 text-[9px] font-semibold leading-3 text-slate-700">{feature.label}</p>
                             </div>
                         ))}
                     </div>
@@ -147,6 +242,7 @@ export default function HomePage({ banners = [] }) {
                                 key={category}
                                 type="button"
                                 onClick={() => setActiveCategory(category)}
+                                aria-pressed={activeCategory === category}
                                 className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-bold transition-all active:scale-95 ${
                                     activeCategory === category
                                         ? 'bg-orange-500 text-white shadow-sm'
@@ -161,39 +257,52 @@ export default function HomePage({ banners = [] }) {
 
 
 
+                <section className="grid grid-cols-2 gap-2 lg:hidden">
+                    {fashionCollections.slice(0, 2).map((collection) => (
+                        <Link key={collection.label} href={collection.href} className="relative h-24 overflow-hidden rounded-md bg-slate-900">
+                            <img src={collection.image} alt={collection.label} className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                            <span className="absolute bottom-2 left-2 right-2 text-xs font-black text-white">{collection.label}</span>
+                        </Link>
+                    ))}
+                </section>
+
                 {/* Flash Sale Section */}
                 <FlashSale products={products} />
 
+                {/* Product Bundles Section */}
+                {bundles.length > 0 && (
+                    <div className="pt-6 pb-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-base font-bold text-slate-900">Bundle Deals</h2>
+                            <Link href="/bundles" className="text-xs font-bold text-rose-600 hover:text-rose-700">
+                                View All
+                            </Link>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                            {bundles.slice(0, 4).map((bundle) => (
+                                <ProductBundleCard key={bundle.id} bundle={bundle} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Trending Products */}
-                <div className="hidden lg:block">
-                    <TrendingProducts products={products} />
-                </div>
+                <TrendingProducts products={products} />
 
                 {/* Recommended Products */}
-                <div className="relative item center pt-3 pb-4 gap-4">
-                    <div className="flex grid-cols-2 items-center justify-between gap-4">
-                        <div>
-                        <h2 className="text-base font-bold px-2 text-slate-900">
-                            Recommended Products
-                        </h2>
-                        </div>
-                        <div>
-                        <span className="text-xs px-2 text-gray-500">View All</span>
-                        </div>
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between px-2">
+                        <h2 className="text-base font-black text-slate-900">Recommended Products</h2>
+                        <Link href="/search" className="text-xs font-black text-orange-600 hover:text-orange-700">View All</Link>
                     </div>
-                
-
-                    <div className="flex items-center justify-between pt-3">
-                        <div>
-                            <h2 className="text-base font-bold text-slate-900">
-                                {activeCategory === 'All' ? '' : activeCategory}
-                            </h2>
-                          
-
-                        </div>
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        {products.slice(0, 5).map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
                     </div>
                 </div>
-                
+
 
 
                 {/* Products */}
@@ -201,7 +310,7 @@ export default function HomePage({ banners = [] }) {
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-base px-2 font-bold text-slate-900">
-                                {activeCategory === 'All' ? 'Deals you cannot miss' : activeCategory}
+                                {activeCategory === 'All' ? 'Fashion deals you cannot miss' : activeCategory}
                             </h2>
 
                         </div>
@@ -213,7 +322,7 @@ export default function HomePage({ banners = [] }) {
 
 
                     {/* Loading */}
-                    {isLoading && <SkeletonLoader type="card" count={4} />}
+                    {isLoading && <SkeletonLoader type="card" count={4} aria-hidden="true" />}
 
                     {/* Error */}
                     {error && (
@@ -268,11 +377,6 @@ export default function HomePage({ banners = [] }) {
                 {/* Recently Viewed */}
                 <div className="hidden lg:block">
                     <RecentlyViewed />
-                </div>
-
-                {/* Newsletter */}
-                <div className="hidden lg:block">
-                    <Newsletter />
                 </div>
             </div>
         </MobileShell>

@@ -11,12 +11,13 @@ function readStoredCart() {
     try {
         const value = window.localStorage.getItem(STORAGE_KEY);
         return value ? JSON.parse(value) : [];
-    } catch {
+    } catch (error) {
+        console.error('Failed to load cart from localStorage:', error);
         return [];
     }
 }
 
-function normalizeProduct(product) {
+function normalizeProduct(product, variant = {}) {
     return {
         id: product.id,
         name: product.name,
@@ -27,7 +28,28 @@ function normalizeProduct(product) {
         category: product.category,
         rating: product.rating,
         reviews_count: product.reviews_count,
+        selected_size: variant.size || product.selected_size,
+        selected_color: variant.color?.name || variant.color || product.selected_color,
+        variant_key: variant.key || product.variant_key,
     };
+}
+
+async function trackAnalytics(eventType, productId, metadata = {}) {
+    try {
+        await fetch('/api/storefront/analytics/track', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_type: eventType,
+                product_id: productId,
+                metadata,
+            }),
+        });
+    } catch (error) {
+        console.error('Failed to track analytics:', error);
+    }
 }
 
 export function CartProvider({ children }) {
@@ -37,16 +59,17 @@ export function CartProvider({ children }) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     }, [items]);
 
-    const addItem = useCallback((product, quantity = 1) => {
+    const addItem = useCallback((product, quantity = 1, variant = {}) => {
         const amount = Math.max(1, Number(quantity) || 1);
-        const safeProduct = normalizeProduct(product);
+        const safeProduct = normalizeProduct(product, variant);
+        const lineKey = `${safeProduct.id}-${safeProduct.selected_size || 'default'}-${safeProduct.selected_color || 'default'}`;
 
         setItems((currentItems) => {
-            const existing = currentItems.find((item) => item.product.id === safeProduct.id);
+            const existing = currentItems.find((item) => item.lineKey === lineKey);
 
             if (existing) {
                 return currentItems.map((item) =>
-                    item.product.id === safeProduct.id
+                    item.lineKey === lineKey
                         ? { ...item, quantity: item.quantity + amount }
                         : item,
                 );
@@ -55,26 +78,30 @@ export function CartProvider({ children }) {
             return [
                 ...currentItems,
                 {
-                    id: `${safeProduct.id}-${Date.now()}`,
+                    id: `${lineKey}-${Date.now()}`,
+                    lineKey,
                     product: safeProduct,
                     quantity: amount,
                 },
             ];
         });
+        
+        // Track analytics
+        trackAnalytics('add_to_cart', product.id, { quantity: amount, variant });
     }, []);
 
-    const updateQuantity = useCallback((productId, quantity) => {
+    const updateQuantity = useCallback((itemId, quantity) => {
         const amount = Math.max(1, Number(quantity) || 1);
 
         setItems((currentItems) =>
             currentItems.map((item) =>
-                item.product.id === productId ? { ...item, quantity: amount } : item,
+                item.id === itemId || item.product.id === itemId ? { ...item, quantity: amount } : item,
             ),
         );
     }, []);
 
-    const removeItem = useCallback((productId) => {
-        setItems((currentItems) => currentItems.filter((item) => item.product.id !== productId));
+    const removeItem = useCallback((itemId) => {
+        setItems((currentItems) => currentItems.filter((item) => item.id !== itemId && item.product.id !== itemId));
     }, []);
 
     const clearCart = useCallback(() => {

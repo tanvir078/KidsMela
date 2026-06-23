@@ -82,3 +82,24 @@ textarea {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
+
+/* Mega menu transitions */
+.mega-menu {
+  transition: opacity 150ms ease-in-out;
+}
+
+/* Category sidebar transitions */
+.category-sidebar {
+  position: sticky;
+  top: 0;
+}
+
+/* Subcategory card transitions */
+.subcategory-card {
+  transition: transform 150ms ease;
+}
+
+/* Loading skeleton animation */
+.loading-skeleton {
+  animation: pulse 1.5s ease-in-out;
+}

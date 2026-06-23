@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { Link } from '@/lib/inertiaCompat';
 import { useCart } from '@/Contexts/CartContext';
 import { useWishlist } from '@/Contexts/WishlistContext';
+import { useCurrency } from '@/Contexts/CurrencyContext';
 import StarRating from './StarRating';
-
-function money(value) {
-    return `$${Number(value ?? 0).toFixed(2)}`;
-}
 
 export default function QuickViewModal({ product, onClose }) {
     const { addItem } = useCart();
     const { isSaved, toggleItem } = useWishlist();
+    const { formatMoney } = useCurrency();
     const [quantity, setQuantity] = useState(1);
     const [added, setAdded] = useState(false);
     const saved = isSaved(product.id);
@@ -50,7 +48,7 @@ export default function QuickViewModal({ product, onClose }) {
                                 <StarRating rating={Number(product.rating ?? 0)} size="sm" />
                                 <span className="text-xs font-bold text-slate-500">({product.reviews_count ?? 0})</span>
                             </div>
-                            <p className="mt-2 text-2xl font-black text-orange-600">{money(product.price)}</p>
+                            <p className="mt-2 text-2xl font-black text-orange-600">{formatMoney(product.price)}</p>
                         </div>
                     </div>
 

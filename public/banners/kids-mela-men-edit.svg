@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="Men's fashion edit">
+  <rect width="900" height="520" fill="#0f172a"/>
+  <rect x="470" y="52" width="280" height="410" rx="34" fill="#f8fafc"/>
+  <path d="M558 106l58 32 58-32 66 48 34 136-56 17-22-72v196H536V235l-22 72-56-17 34-136 66-48z" fill="#e2e8f0"/>
+  <path d="M616 138l-30 48h60l-30-48m0 0v292" stroke="#94a3b8" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M540 180h150" stroke="#f97316" stroke-width="10" stroke-linecap="round"/>
+</svg>

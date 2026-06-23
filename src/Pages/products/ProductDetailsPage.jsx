@@ -13,9 +13,27 @@ import ProductCard from '@/Components/Storefront/ProductCard';
 import ImageGallery from '@/Components/Storefront/ImageGallery';
 import ProductVariants from '@/Components/Storefront/ProductVariants';
 import SocialShare from '@/Components/Storefront/SocialShare';
+import StockAlertButton from '@/Components/Storefront/StockAlertButton';
 
 function money(value) {
     return `$${Number(value ?? 0).toFixed(2)}`;
+}
+
+function asArray(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter(Boolean);
+    return String(value).split(',').map((item) => item.trim()).filter(Boolean);
+}
+
+function getFashionDetails(product) {
+    return {
+        fabric: product.fabric || product.material || 'Premium blended cotton',
+        fit: product.fit || product.style_fit || 'Regular fit',
+        occasion: product.occasion || 'Casual, office, and daily wear',
+        care: product.care_instruction || product.care || 'Machine wash cold, wash dark colors separately, do not bleach',
+        sizes: asArray(product.sizes || product.available_sizes || product.size),
+        colors: asArray(product.colors || product.available_colors || product.color || product.colour),
+    };
 }
 
 export default function ProductDetailsPage({ productId }) {
@@ -25,10 +43,11 @@ export default function ProductDetailsPage({ productId }) {
     const [product, setProduct] = useState(null);
     const [allProducts, setAllProducts] = useState([]);
     const [quantity, setQuantity] = useState(1);
-    const [selectedVariant, setSelectedVariant] = useState({ size: 'M', color: 'Black' });
+    const [selectedVariant, setSelectedVariant] = useState({ size: '', color: null, key: '' });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [added, setAdded] = useState(false);
+    const [variantError, setVariantError] = useState('');
     const [reviews, setReviews] = useState([]);
 
     const recommendations = useMemo(() => {
@@ -40,7 +59,7 @@ export default function ProductDetailsPage({ productId }) {
 
     const discount = useMemo(() => {
         if (!product) return 0;
-        const compare = Number(product.compare_price ?? 0);
+        const compare = Number(product.compare_price ?? product.sale_price ?? 0);
         const price = Number(product.price ?? 0);
         if (compare > price && compare > 0) {
             return Math.round(((compare - price) / compare) * 100);
@@ -84,7 +103,13 @@ export default function ProductDetailsPage({ productId }) {
     }, [productId]);
 
     const handleAdd = () => {
-        addItem(product, quantity);
+        if (!selectedVariant.size || !selectedVariant.color?.name) {
+            setVariantError('Please select size and color before adding this style.');
+            return;
+        }
+
+        setVariantError('');
+        addItem(product, quantity, selectedVariant);
         setAdded(true);
         window.setTimeout(() => setAdded(false), 1800);
     };
@@ -93,7 +118,18 @@ export default function ProductDetailsPage({ productId }) {
         setReviews([...reviews, { ...review, author: 'You', date: 'Just now' }]);
     };
 
+    const handleVariantChange = (variant) => {
+        setSelectedVariant(variant);
+        if (variant.size && variant.color?.name) {
+            setVariantError('');
+        }
+    };
+
     const stock = product ? Number(product.stock ?? 0) : 0;
+    const fashionDetails = product ? getFashionDetails(product) : null;
+    const displayImage = product?.display_image_url || product?.image_url;
+    const comparePrice = product ? Number(product.compare_price ?? product.sale_price ?? 0) : 0;
+    const variantReady = Boolean(selectedVariant.size && selectedVariant.color?.name);
 
     return (
         <MobileShell title="Product Details" showSearch={false}>
@@ -131,7 +167,7 @@ export default function ProductDetailsPage({ productId }) {
                     </div>
 
                     {/* Image + Discount Badge */}
-                    <div className="relative bg-white">
+                    <div className="relative bg-white lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.85fr)] lg:gap-8 lg:bg-transparent lg:px-6">
                         {discount > 0 && (
                             <span className="absolute left-0 top-4 z-10 rounded-r-full bg-red-500 px-3 py-1 text-xs font-black text-white shadow-md">
                                 -{discount}%
@@ -146,19 +182,18 @@ export default function ProductDetailsPage({ productId }) {
                         >
                             ♥
                         </button>
-                        <ImageGallery 
-                            mainImage={product.image_url} 
+                        <ImageGallery
+                            mainImage={displayImage}
                             images={product.additional_images || []} 
                         />
-                    </div>
 
-                    <div className="space-y-4 px-4 py-4">
+                        <div className="space-y-4 px-4 py-4 lg:px-0 lg:py-0">
                         {added && (
                             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-3 text-sm font-black text-white shadow-md">
                                 <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/10" />
                                 <div className="relative flex items-center gap-2">
                                     <span className="text-lg">&#10004;</span>
-                                    Added to Cart
+                                    Added to cart: {selectedVariant.size} / {selectedVariant.color?.name}
                                 </div>
                             </div>
                         )}
@@ -184,9 +219,9 @@ export default function ProductDetailsPage({ productId }) {
 
                             {/* Price section with discount */}
                             <div className="mt-3 flex items-end gap-3">
-                                <p className="text-3xl font-black text-orange-600">{money(product.price)}</p>
-                                {discount > 0 && (
-                                    <p className="mb-0.5 text-base text-slate-400 line-through">{money(product.compare_price)}</p>
+                                <p className="text-3xl font-black text-rose-600">{money(product.price)}</p>
+                                {comparePrice > Number(product.price ?? 0) && (
+                                    <p className="mb-0.5 text-base text-slate-400 line-through">{money(comparePrice)}</p>
                                 )}
                                 {discount > 0 && (
                                     <span className="mb-0.5 rounded-full bg-red-50 px-2 py-0.5 text-xs font-black text-red-600">
@@ -204,11 +239,14 @@ export default function ProductDetailsPage({ productId }) {
                                         : 'bg-red-50 text-red-700'
                             }`}>
                                 {stock > 5
-                                    ? `✓ In Stock (${stock})`
+                                    ? `In Stock (${stock})`
                                     : stock > 0
-                                        ? `⚠ Only ${stock} left!`
-                                        : '✗ Out of Stock'}
+                                        ? `Only ${stock} left`
+                                        : 'Out of Stock'}
                             </div>
+
+                            {/* Stock Alert Button */}
+                            {stock <= 0 && <StockAlertButton product={product} stock={stock} />}
 
                             {/* Sold count */}
                             {Number(product.sold_count ?? 0) > 0 && (
@@ -218,50 +256,69 @@ export default function ProductDetailsPage({ productId }) {
                             )}
                         </div>
 
-                        {/* Delivery Info */}
-                        <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <h2 className="text-base font-black text-slate-950">Delivery Info</h2>
-                            <div className="mt-3 space-y-2">
-                                <div className="flex items-center gap-3 text-sm">
-                                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-orange-50 text-orange-600">
-                                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                                    </span>
-                                    <div>
-                                        <p className="font-bold text-slate-800">Delivery in 1-2 days (local)</p>
-                                        <p className="text-xs text-slate-400">3-5 days for other areas</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm">
-                                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    </span>
-                                    <p className="font-bold text-slate-800">Cash on Delivery</p>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm">
-                                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-600">
-                                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 4H3a2 2 0 00-2 2v12a2 2 0 002 2h18a2 2 0 002-2V6a2 2 0 00-2-2z"/><path d="M1 10h22"/></svg>
-                                    </span>
-                                    <p className="font-bold text-slate-800">7-day Return Policy</p>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Description */}
                         <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                             <h2 className="text-base font-black text-slate-950">Description</h2>
-                            <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{product.description}</p>
+                            <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
+                                {product.description || 'A curated Kids Mela style made for comfort, confident fit, and everyday wear.'}
+                            </p>
                         </div>
 
                         {/* Variant Selector */}
                         <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <h2 className="text-base font-black text-slate-950">Select Variant</h2>
-                            <ProductVariants onVariantChange={setSelectedVariant} />
+                            <h2 className="text-base font-black text-slate-950">Select Size & Color</h2>
+                            <ProductVariants product={product} selectedVariant={selectedVariant} onVariantChange={handleVariantChange} />
+                            {variantError && (
+                                <p className="mt-3 rounded-2xl bg-rose-50 px-3 py-2 text-xs font-black text-rose-700">
+                                    {variantError}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="grid gap-3 lg:grid-cols-2">
+                            <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                <h2 className="text-base font-black text-slate-950">Fabric & Fit</h2>
+                                <div className="mt-3 space-y-3 text-sm">
+                                    {[
+                                        ['Fabric', fashionDetails.fabric],
+                                        ['Fit', fashionDetails.fit],
+                                        ['Occasion', fashionDetails.occasion],
+                                        ['Care', fashionDetails.care],
+                                    ].map(([label, value]) => (
+                                        <div key={label} className="flex justify-between gap-4 border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                                            <span className="font-semibold text-slate-500">{label}</span>
+                                            <span className="text-right font-black text-slate-950">{value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                <h2 className="text-base font-black text-slate-950">Delivery & Exchange</h2>
+                                <div className="mt-3 space-y-3 text-sm font-bold text-slate-800">
+                                    <div className="rounded-2xl bg-rose-50 px-3 py-3 text-rose-700">
+                                        Delivery in Dhaka: 1-2 days. Outside Dhaka: 3-5 days.
+                                    </div>
+                                    <div className="rounded-2xl bg-emerald-50 px-3 py-3 text-emerald-700">
+                                        Cash on delivery and secure online payment available.
+                                    </div>
+                                    <div className="rounded-2xl bg-slate-50 px-3 py-3 text-slate-700">
+                                        7-day exchange support for size or color issues.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Product Details Table */}
                         <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                             <h2 className="text-base font-black text-slate-950">Product Details</h2>
                             <div className="mt-3 space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="font-semibold text-slate-500">Selected</span>
+                                    <span className="font-black text-slate-950">
+                                        {selectedVariant.size || 'Not selected'} / {selectedVariant.color?.name || 'Not selected'}
+                                    </span>
+                                </div>
                                 <div className="flex justify-between">
                                     <span className="font-semibold text-slate-500">Category</span>
                                     <span className="font-black text-slate-950">{product.category || 'Featured'}</span>
@@ -296,15 +353,16 @@ export default function ProductDetailsPage({ productId }) {
                                 </div>
                             </div>
                         )}
+                        </div>
                     </div>
 
                     {/* Sticky Bottom Bar */}
                     <div className="fixed bottom-16 left-0 right-0 z-20 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] lg:bottom-0 lg:static lg:border-0 lg:shadow-none">
                         <div className="mx-auto flex max-w-md items-center gap-3 lg:max-w-none">
                             <div className="shrink-0">
-                                <p className="text-lg font-black text-orange-600">{money(product.price)}</p>
-                                {discount > 0 && (
-                                    <p className="text-xs text-slate-400 line-through">{money(product.compare_price)}</p>
+                                <p className="text-lg font-black text-rose-600">{money(product.price)}</p>
+                                {comparePrice > Number(product.price ?? 0) && (
+                                    <p className="text-xs text-slate-400 line-through">{money(comparePrice)}</p>
                                 )}
                             </div>
                             <div className="flex h-11 items-center rounded-xl bg-slate-100 px-1">
@@ -328,9 +386,9 @@ export default function ProductDetailsPage({ productId }) {
                                 type="button"
                                 disabled={stock <= 0}
                                 onClick={handleAdd}
-                                className="h-11 flex-1 rounded-xl bg-orange-600 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95 disabled:bg-slate-300 disabled:shadow-none"
+                                className="h-11 flex-1 rounded-xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95 disabled:bg-slate-300 disabled:shadow-none"
                             >
-                                {stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                                {stock <= 0 ? 'Out of Stock' : variantReady ? `Add ${selectedVariant.size} to Cart` : 'Select Options'}
                             </button>
                         </div>
                     </div>

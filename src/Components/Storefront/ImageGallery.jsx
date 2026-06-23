@@ -32,7 +32,7 @@ export default function ImageGallery({ images, mainImage, videoUrl }) {
     return (
         <div className="space-y-3">
             <div
-                className="relative aspect-square overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 cursor-zoom-in"
+                className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-rose-50 to-slate-100 cursor-zoom-in lg:rounded-lg"
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
                 onMouseMove={handleMouseMove}
@@ -48,7 +48,7 @@ export default function ImageGallery({ images, mainImage, videoUrl }) {
                     <img 
                         src={selectedImage} 
                         alt="Product image" 
-                        className={`h-full w-full object-cover transition-transform duration-200 ${
+                            className={`h-full w-full object-contain transition-transform duration-200 ${
                             isZoomed ? 'scale-150' : 'scale-100'
                         }`}
                         style={{
@@ -84,7 +84,7 @@ export default function ImageGallery({ images, mainImage, videoUrl }) {
                         className="absolute inset-0 grid place-items-center bg-black/30 transition-all duration-200 hover:bg-black/40"
                     >
                         <div className="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-3xl shadow-lg">
-                            ▶️
+                            Play
                         </div>
                     </button>
                 )}
@@ -108,7 +108,7 @@ export default function ImageGallery({ images, mainImage, videoUrl }) {
                             onClick={() => setSelectedImage(image)}
                             className={`h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-all duration-200 active:scale-95 ${
                                 selectedImage === image 
-                                    ? 'border-orange-500 ring-2 ring-orange-200' 
+                                    ? 'border-rose-600 ring-2 ring-rose-100' 
                                     : 'border-transparent hover:border-slate-300'
                             }`}
                         >

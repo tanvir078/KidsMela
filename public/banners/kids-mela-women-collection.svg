@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="Women's fashion collection">
+  <rect width="900" height="520" fill="#fff1f2"/>
+  <rect x="498" y="44" width="274" height="424" rx="137" fill="#ffffff"/>
+  <path d="M590 96h82l38 96-38 32 68 204H522l68-204-38-32 38-96z" fill="#be123c"/>
+  <g fill="#fecdd3">
+    <circle cx="584" cy="244" r="13"/><circle cx="670" cy="280" r="16"/><circle cx="610" cy="344" r="12"/><circle cx="690" cy="394" r="13"/>
+  </g>
+  <path d="M590 96l41 56 41-56m-41 56v276" stroke="#fff1f2" stroke-width="9" stroke-linecap="round" fill="none"/>
+</svg>

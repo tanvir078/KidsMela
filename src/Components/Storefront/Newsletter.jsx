@@ -10,7 +10,7 @@ export default function Newsletter() {
         e.preventDefault();
         if (email.trim()) {
             setIsSubscribed(true);
-            addToast('Successfully subscribed to newsletter!', 'success');
+            addToast('Successfully subscribed to Kids Mela updates!', 'success');
             setEmail('');
         }
     };
@@ -23,7 +23,7 @@ export default function Newsletter() {
                     <div>
                         <h3 className="text-lg font-black">You're subscribed!</h3>
                         <p className="text-sm font-semibold text-white/90">
-                            Check your email for exclusive deals.
+                            Check your email for new drops and exclusive fashion deals.
                         </p>
                     </div>
                 </div>
@@ -32,16 +32,16 @@ export default function Newsletter() {
     }
 
     return (
-        <div className="rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-orange-200">
+        <div className="relative overflow-hidden rounded-md bg-gradient-to-br from-slate-950 via-rose-950 to-fuchsia-900 p-6 text-white shadow-xl shadow-rose-200">
             <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
             <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
             <div className="relative">
                 <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">📧</span>
-                    <h3 className="text-lg font-black">Get Exclusive Deals</h3>
+                    <h3 className="text-lg font-black">Get New Drop Alerts</h3>
                 </div>
                 <p className="mb-4 text-sm font-semibold text-white/90">
-                    Subscribe to our newsletter for special offers and updates.
+                    Subscribe for seasonal collections, restock alerts, and member-only offers.
                 </p>
                 <form onSubmit={handleSubscribe} className="flex gap-2">
                     <input

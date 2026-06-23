@@ -4,7 +4,7 @@ export default function SocialShare({ product }) {
     const [copied, setCopied] = useState(false);
 
     const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const shareText = `Check out ${product.name} on Progotix!`;
+    const shareText = `Check out ${product.name} on Kids Mela!`;
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(shareUrl);

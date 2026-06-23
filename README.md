@@ -1,6 +1,6 @@
-# Progotix Ecommerce Storefront
+# Kids Mela Ecommerce Storefront
 
-Standalone React/Vite storefront UI for Progotix.
+Standalone React/Vite storefront UI for Kids Mela.
 
 This project does not own the database, Laravel models, migrations, or backend controllers. It talks to the shared backend in `progotix-api`.
 
@@ -30,4 +30,4 @@ Set the API base URL in `.env`:
 ```env
 VITE_API_BASE_URL=http://progotix-api.test/api
 ```
-# progotix-ecommerce
+# kids-mela-ecommerce

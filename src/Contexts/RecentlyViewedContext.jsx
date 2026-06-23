@@ -12,7 +12,8 @@ function readStoredItems() {
     try {
         const value = window.localStorage.getItem(STORAGE_KEY);
         return value ? JSON.parse(value) : [];
-    } catch {
+    } catch (error) {
+        console.error('Failed to load recently viewed products from localStorage:', error);
         return [];
     }
 }

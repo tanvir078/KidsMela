@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { usePage } from '@/lib/inertiaCompat';
 
-const GA_TRACKING_ID = 'G-XXXXXXXXXX'; // Replace with your actual GA tracking ID
+const GA_TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID || '';
 
 export function GoogleAnalytics() {
     useEffect(() => {
@@ -11,14 +11,16 @@ export function GoogleAnalytics() {
         script1.src = `https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`;
         document.head.appendChild(script1);
 
-        const script2 = document.createElement('script');
-        script2.innerHTML = `
+        if (GA_TRACKING_ID) {
+          const script2 = document.createElement('script');
+          script2.textContent = `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_TRACKING_ID}');
-        `;
-        document.head.appendChild(script2);
+          `;
+          document.head.appendChild(script2);
+        }
 
         return () => {
             document.head.removeChild(script1);

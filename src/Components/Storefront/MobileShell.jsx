@@ -14,19 +14,19 @@ import 'swiper/css/pagination';
 
 const navItems = [
     { label: 'Home', href: '/', match: /^\/$/, icon: 'home' },
-    { label: 'Campaigns', href: '/', match: /^\/campaigns/, icon: 'campaigns' },
+    { label: 'Campaigns', href: '/campaigns', match: /^\/campaigns/, icon: 'campaigns' },
     { label: 'Categories', href: '/categories', match: /^\/categories/, icon: 'grid' },
     { label: 'Cart', href: '/cart', match: /^\/cart|^\/checkout/, icon: 'cart' },
     { label: 'Account', href: '/account', match: /^\/account/, icon: 'user' },
 ];
 
 const fallbackBanners = [
-    '/banners/banner1.png',
-    '/banners/banner2.png',
-    '/banners/banner3.png',
+    '/banners/kids-mela-hero.svg',
+    '/banners/kids-mela-women-collection.svg',
+    '/banners/kids-mela-shoes-bags.svg',
 ];
 
-const topCategoryTabs = ['All', 'Men', 'Women', 'Phones', 'Watches', 'Groceries', 'Home & Living', 'Gadgets'];
+const topCategoryTabs = ['All', 'Men', 'Women', 'Kids', 'Shoes', 'Bags', 'Accessories', 'New Arrivals'];
 
 function normalizeBanner(banner, index) {
     if (typeof banner === 'string') {
@@ -51,7 +51,7 @@ function BottomNavIcon({ icon, active }) {
         tag: 'M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z',
         cart: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
         user: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-        campaigns: 'M13 10V3L4 14h7v7l9-11h-7z 0 1 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4'
+        campaigns: 'M13 3 4 14h7l-1 7 10-12h-7l0-6z'
     };
 
     return (
@@ -69,11 +69,12 @@ function BottomNavIcon({ icon, active }) {
 
 export default function MobileShell({
     children,
-    title = 'Progotix',
+    title = 'Kids Mela',
     showSearch = true,
     banners = [],
     contentOverBanner = false,
     showPromoBanner = true,
+    hideTopBar = false,
 }) {
     const { itemCount } = useCart();
     const { history, addToHistory, clearHistory } = useSearchHistory();
@@ -81,6 +82,7 @@ export default function MobileShell({
 
     const [searchFocused, setSearchFocused] = useState(false);
     const searchRef = useRef(null);
+    const headerBannerRef = useRef(null);
 
     const currentQuery = useMemo(() => {
         if (typeof window === 'undefined') return '';
@@ -98,8 +100,20 @@ export default function MobileShell({
         return normalized.length > 0 ? normalized : fallbackBanners.map(normalizeBanner);
     }, [banners]);
 
+
+     {!hideTopBar && (
+    <header className={`...`}>
+        ...
+     </header>
+ )}
+
     useEffect(() => {
-        getProducts().then(setAllProducts).catch(() => {});
+        getProducts()
+            .then(setAllProducts)
+            .catch((error) => {
+                console.error('Failed to load products in mobile shell:', error);
+                // Optional: Set empty state or show user-friendly error message
+            });
     }, []);
 
     useEffect(() => {
@@ -131,6 +145,18 @@ export default function MobileShell({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const syncHeaderBanner = (swiper) => {
+        const realIndex = swiper.realIndex || 0;
+
+        if (headerBannerRef.current) {
+            if (promoBanners.length > 1) {
+                headerBannerRef.current.slideToLoop(realIndex, 500);
+            } else {
+                headerBannerRef.current.slideTo(realIndex, 500);
+            }
+        }
+    };
+
     const submitSearch = (event) => {
         event.preventDefault();
 
@@ -152,39 +178,70 @@ export default function MobileShell({
         <div className="min-h-screen bg-gray-50 text-slate-950 dark:bg-slate-900 dark:text-slate-50">
             <DesktopHeader />
 
-            <div className="mx-auto min-h-screen max-w-md bg-white lg:max-w-none lg:bg-transparent lg:shadow-none">
+            <div className="relative mx-auto min-h-screen max-w-md bg-white lg:max-w-none lg:bg-transparent lg:shadow-none">
+                {showPromoBanner && contentOverBanner && (
+                    <div className="fixed inset-x-0 top-0 z-10 mx-auto h-[260px] max-w-md overflow-hidden lg:hidden">
+                        <Swiper
+                            modules={[Autoplay]}
+                            autoplay={{ delay: 3200, disableOnInteraction: false }}
+                            loop={promoBanners.length > 1}
+                            speed={500}
+                            onSlideChange={syncHeaderBanner}
+                            onAfterInit={syncHeaderBanner}
+                            className="h-full w-full"
+                        >
+                            {promoBanners.map((banner, index) => (
+                                <SwiperSlide key={`${banner.id}-${index}`}>
+                                    <Link href={banner.href} className="block h-full">
+                                        <img
+                                            src={banner.image}
+                                            alt={banner.alt}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </Link>
+                                </SwiperSlide>
+                            ))}
+                        </Swiper>
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-black/5 to-transparent" />
+                    </div>
+                )}
+
                 <header
                     className={`${
-                        contentOverBanner ? 'fixed inset-x-0 top-0 mx-auto h-[260px] max-w-md overflow-hidden' : 'sticky top-0 bg-[#e8fbff] shadow-sm'
-                    } z-40 lg:hidden`}
+                        contentOverBanner
+                            ? 'fixed inset-x-0 top-0 mx-auto max-w-md overflow-hidden bg-transparent'
+                            : 'sticky top-0 bg-[#e8fbff] shadow-sm'
+                    } z-50 lg:hidden`}
                 >
                     {showPromoBanner && contentOverBanner && (
-                        <div className="absolute inset-0">
+                        <div className="pointer-events-none absolute left-0 top-0 z-0 h-[260px] w-full overflow-hidden">
                             <Swiper
-                                modules={[Autoplay]}
-                                autoplay={{ delay: 3200, disableOnInteraction: false }}
+                                modules={[]}
+                                onSwiper={(swiper) => {
+                                    headerBannerRef.current = swiper;
+                                }}
+                                allowTouchMove={false}
                                 loop={promoBanners.length > 1}
+                                speed={500}
                                 className="h-full w-full"
                             >
                                 {promoBanners.map((banner, index) => (
-                                    <SwiperSlide key={`${banner.id}-${index}`}>
-                                        <Link href={banner.href} className="block h-full">
-                                            <img
-                                                src={banner.image}
-                                                alt={banner.alt}
-                                                className="h-full w-full object-cover"
-                                            />
-                                        </Link>
+                                    <SwiperSlide key={`header-crop-${banner.id}-${index}`}>
+                                        <img
+                                            src={banner.image}
+                                            alt={banner.alt}
+                                            className="h-full w-full object-cover"
+                                        />
                                     </SwiperSlide>
                                 ))}
                             </Swiper>
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/5 to-transparent" />
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-black/5 to-transparent" />
                         </div>
                     )}
 
-                    <div className="relative z-20 flex min-h-[58px] items-center gap-2 px-3 pb-2 pt-[max(env(safe-area-inset-top),8px)]">
+                    <div className="relative z-50 flex min-h-[58px] items-center gap-2 px-3 pb-2 pt-[max(env(safe-area-inset-top),2px)]">
                         {showSearch && (
-                            <div className="relative z-40 min-w-0 flex-1" ref={searchRef}>
+                            <div className="relative z-50 min-w-0 flex-1" ref={searchRef}>
                                 <form onSubmit={submitSearch} className="relative">
                                     <div className={`flex h-10 items-center gap-2 rounded bg-white pl-3 shadow-sm ring-1 transition-all duration-200 ${searchFocused ? 'ring-cyan-400' : 'ring-white/50'}`}>
                                         <input
@@ -195,7 +252,7 @@ export default function MobileShell({
                                                 if (query.length >= 2 || history.length > 0) setShowSuggestions(true);
                                             }}
                                             className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
-                                            placeholder="Search products..."
+                                            placeholder="Search fashion..."
                                         />
 
                                         <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0 text-slate-500" fill="none">
@@ -230,7 +287,7 @@ export default function MobileShell({
                                 </form>
 
                                 {showSuggestions && (suggestions.length > 0 || history.length > 0) && (
-                                    <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
+                                    <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
                                         {history.length > 0 && (
                                             <div className="border-b border-gray-100 px-4 py-3">
                                                 <div className="mb-2 flex items-center justify-between">
@@ -301,9 +358,11 @@ export default function MobileShell({
                         <div className="flex items-center gap-1.5">
                             <button
                                 type="button"
-                                onClick={() => console.log('Google Lens clicked')}
-                                className="grid h-10 w-10 shrink-0 place-items-center rounded bg-white/90 text-slate-500 shadow-sm ring-1 ring-white/60 active:bg-white"
-                                aria-label="Google Lens"
+                                onClick={() => {
+                                  window.open('https://lens.google.com/', '_blank', 'noopener,noreferrer');
+                                }}
+                                className="grid h-9 w-9 shrink-0 place-items-center rounded bg-white/90 text-slate-500 shadow-sm ring-1 ring-white/60 active:bg-white"
+                                aria-label="Search with Google Lens"
                             >
                                 <img
                                     src="/google-lens.svg"
@@ -311,7 +370,6 @@ export default function MobileShell({
                                     className="h-6 w-6 object-contain"
                                 />
                             </button>
-                          
                         </div>
                     </div>
 
@@ -340,8 +398,8 @@ export default function MobileShell({
                     )}
 
                     {showPromoBanner && contentOverBanner && (
-                        <div className="relative z-20 overflow-hidden px-3">
-                            <div className="flex gap-4 overflow-x-auto whitespace-nowrap pb-2 text-[12px] font-black text-white drop-shadow scrollbar-hide">
+                        <div className="relative z-50 overflow-hidden px-4">
+                            <div className="flex gap-5 overflow-x-auto whitespace-nowrap pb-1 text-[12px] font-black text-white drop-shadow scrollbar-hide">
                                 {topCategoryTabs.map((tab) => (
                                     <Link
                                         key={tab}
@@ -356,14 +414,15 @@ export default function MobileShell({
                     )}
                 </header>
 
-                <div className={`lg:mx-auto lg:max-w-7xl lg:px-6 ${contentOverBanner ? 'pt-[260px] lg:pt-0' : ''}`}>
-                    <main className={`pb-20 lg:pb-8 lg:py-6 ${contentOverBanner ? 'relative z-20 bg-white lg:bg-transparent' : ''}`}>
+              <div className={`relative z-30 lg:mx-auto lg:max-w-7xl lg:px-6 ${contentOverBanner && !hideTopBar ? 'pt-[260px] lg:pt-0' : ''}`}>
+
+                    <main className={`pb-20 lg:pb-8 lg:py-6 ${contentOverBanner ? 'relative z-30 bg-white lg:bg-transparent' : ''}`}>
                         {children}
                     </main>
                 </div>
 
-                <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-gray-100 bg-[#4d0659] pb-[env(safe-area-inset-bottom)] backdrop-blur-lg lg:hidden">
-                    <div className="grid grid-cols-5">
+                <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-rose-100 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-lg lg:hidden">
+                    <div className="grid h-[68px] grid-cols-5">
                         {navItems.map((item) => {
                             const active = item.match.test(url);
 
@@ -371,21 +430,21 @@ export default function MobileShell({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`relative flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition-colors ${
-                                        active ? 'text-orange-500' : 'text-gray-400'
+                                    className={`relative flex min-w-0 flex-col items-center justify-center gap-1 px-1 transition-colors ${
+                                        active ? 'text-rose-600' : 'text-slate-400'
                                     }`}
                                 >
                                     <BottomNavIcon icon={item.icon} active={active} />
-                                    <span>{item.label}</span>
+                                    <span className="max-w-full truncate text-[11px] font-bold leading-none">{item.label}</span>
 
                                     {item.label === 'Cart' && itemCount > 0 && (
-                                        <span className="absolute left-1/2 top-1 ml-2 grid min-h-[16px] min-w-[16px] place-items-center rounded-full bg-orange-500 px-1 text-[9px] font-bold text-white">
+                                        <span className="absolute left-1/2 top-2 ml-2 grid min-h-[16px] min-w-[16px] place-items-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white">
                                             {itemCount}
                                         </span>
                                     )}
 
                                     {active && (
-                                        <span className="absolute bottom-0 left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-full bg-orange-500" />
+                                        <span className="absolute bottom-1 left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-full bg-rose-600" />
                                     )}
                                 </Link>
                             );
@@ -396,8 +455,6 @@ export default function MobileShell({
                 <Toast />
                 <LiveChat />
             </div>
-
-            <Footer />
         </div>
     );
 }

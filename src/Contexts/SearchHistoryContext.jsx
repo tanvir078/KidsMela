@@ -4,6 +4,24 @@ const STORAGE_KEY = 'progotix_search_history';
 
 const SearchHistoryContext = createContext(null);
 
+async function trackAnalytics(eventType, productId, metadata = {}) {
+    try {
+        await fetch('/api/storefront/analytics/track', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_type: eventType,
+                product_id: productId,
+                metadata,
+            }),
+        });
+    } catch (error) {
+        console.error('Failed to track analytics:', error);
+    }
+}
+
 export const SearchHistoryProvider = ({ children }) => {
     const [history, setHistory] = useState([]);
 
@@ -25,6 +43,9 @@ export const SearchHistoryProvider = ({ children }) => {
             const filtered = prev.filter((item) => item.toLowerCase() !== query.toLowerCase());
             return [query, ...filtered].slice(0, 10);
         });
+        
+        // Track analytics
+        trackAnalytics('search', null, { search_term: query });
     }, []);
 
     const removeFromHistory = useCallback((query) => {

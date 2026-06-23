@@ -1,31 +1,22 @@
-export async function getProducts() {
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace(/\/$/, '');
-    const response = await fetch(`${baseUrl}/storefront/products`, {
-        headers: {
-            Accept: 'application/json',
-        },
-    });
+import { apiRequest } from '@/lib/api';
+import { errorHandler } from '@/lib/errorHandler';
 
-    if (!response.ok) {
-        throw new Error('Products could not be loaded.');
+export async function getProducts(params = {}) {
+    try {
+        const payload = await apiRequest('/storefront/products', { params });
+        return payload.products ?? payload.data ?? [];
+    } catch (error) {
+        errorHandler.logError('GET_PRODUCTS_ERROR', error, 'Failed to load products');
+        throw error;
     }
-
-    const payload = await response.json();
-    return payload.products ?? payload.data ?? [];
 }
 
 export async function getProduct(id) {
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace(/\/$/, '');
-    const response = await fetch(`${baseUrl}/storefront/products/${id}`, {
-        headers: {
-            Accept: 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Product could not be loaded.');
+    try {
+        const payload = await apiRequest(`/storefront/products/${id}`);
+        return payload.product ?? payload.data;
+    } catch (error) {
+        errorHandler.logError('GET_PRODUCT_ERROR', error, `Failed to load product ${id}`);
+        throw error;
     }
-
-    const payload = await response.json();
-    return payload.product ?? payload.data;
 }

@@ -4,6 +4,24 @@ const STORAGE_KEY = 'progotix_comparison';
 
 const ComparisonContext = createContext(null);
 
+async function trackAnalytics(eventType, productId, metadata = {}) {
+    try {
+        await fetch('/api/storefront/analytics/track', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_type: eventType,
+                product_id: productId,
+                metadata,
+            }),
+        });
+    } catch (error) {
+        console.error('Failed to track analytics:', error);
+    }
+}
+
 export const ComparisonProvider = ({ children }) => {
     const [compareList, setCompareList] = useState([]);
 
@@ -24,6 +42,8 @@ export const ComparisonProvider = ({ children }) => {
         }
         if (!compareList.some(item => item.id === product.id)) {
             setCompareList([...compareList, product]);
+            // Track analytics
+            trackAnalytics('comparison_add', product.id);
             return true;
         }
         return false;
@@ -31,6 +51,8 @@ export const ComparisonProvider = ({ children }) => {
 
     const removeFromCompare = (productId) => {
         setCompareList(compareList.filter(item => item.id !== productId));
+        // Track analytics
+        trackAnalytics('remove_from_comparison', productId);
     };
 
     const isInCompare = (productId) => {

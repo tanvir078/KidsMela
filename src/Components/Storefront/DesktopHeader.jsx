@@ -1,31 +1,75 @@
 import { Link, router, usePage } from '@/lib/inertiaCompat';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCart } from '@/Contexts/CartContext';
 import { useWishlist } from '@/Contexts/WishlistContext';
 import { useSearchHistory } from '@/Contexts/SearchHistoryContext';
+import { useLanguage } from '@/Contexts/LanguageContext';
+import { useCurrency } from '@/Contexts/CurrencyContext';
 import { getProducts } from '@/services/products';
+import { storefrontApi } from '@/lib/api';
+import { Globe, DollarSign, Phone, HeadphonesIcon, ChevronDown, User, LogOut, X, ChevronRight } from 'lucide-react';
 
 const navLinks = [
   { label: 'Home', href: '/' },
-  { label: 'Categories', href: '/categories' },
-  { label: 'Deals', href: '/search' },
+  { label: 'Categories', href: '/categories', megaMenu: true },
+  { label: 'New Arrivals', href: '/search?sort=newest' },
+  { label: 'Flash Sale', href: '/flash-sale' },
+  { label: 'Sale', href: '/search?discount=true' },
   { label: 'Orders', href: '/orders' },
 ];
 
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'bn', name: 'বাংলা', flag: '🇧🇩' },
+];
+
+const currencies = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
+];
+
 export default function DesktopHeader() {
-  const { url } = usePage();
+  const { url, auth } = usePage();
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { history, addToHistory, clearHistory } = useSearchHistory();
+  const { language, changeLanguage, availableLanguages } = useLanguage();
+  const { currency, setCurrency, availableCurrencies, currencySymbols } = useCurrency();
 
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
+  const [searchCategory, setSearchCategory] = useState('all');
+  const [trendingSearches, setTrendingSearches] = useState(['Dresses', 'Shirts', 'Jeans', 'Sneakers', 'Handbags', 'Jackets']);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMegaMenu, setShowMegaMenu] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
   const searchRef = useRef(null);
+  const langRef = useRef(null);
+  const currencyRef = useRef(null);
+  const userMenuRef = useRef(null);
+  const megaMenuRef = useRef(null);
 
   useEffect(() => {
     getProducts().then(setAllProducts);
+  }, []);
+
+  useEffect(() => {
+    storefrontApi.categories()
+      .then(data => {
+        setCategories(data.categories || []);
+        setCategoriesLoading(false);
+      })
+      .catch(error => {
+        console.error('Failed to load categories:', error);
+        setCategoriesLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -50,35 +94,86 @@ export default function DesktopHeader() {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSuggestions(false);
       }
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setShowLangMenu(false);
+      }
+      if (currencyRef.current && !currencyRef.current.contains(e.target)) {
+        setShowCurrencyMenu(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setShowUserMenu(false);
+      }
+      if (megaMenuRef.current && !megaMenuRef.current.contains(e.target)) {
+        setShowMegaMenu(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const submitSearch = (e) => {
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setHoverTimeout(setTimeout(() => setShowMegaMenu(true), 200));
+  }, [hoverTimeout]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setHoverTimeout(setTimeout(() => setShowMegaMenu(false), 200));
+  }, [hoverTimeout]);
+
+  const handleClick = useCallback(() => {
+    setShowMegaMenu(!showMegaMenu);
+  }, [showMegaMenu]);
+
+  const submitSearch = useCallback((e) => {
     e.preventDefault();
     const trimmed = query.trim();
     if (trimmed) addToHistory(trimmed);
     setShowSuggestions(false);
     router.get('/search', trimmed ? { q: trimmed } : {});
-  };
+  }, [query, addToHistory]);
 
-  const isActive = (href) => {
+  const isActive = useCallback((href) => {
     if (href === '/') return url === '/' || url === '';
     return url.startsWith(href);
-  };
+  }, [url]);
 
   return (
     <header className="sticky top-0 z-50 hidden lg:block border-b border-slate-200 bg-white shadow-sm">
+      {/* Announcement Banner */}
+      {showAnnouncement && (
+        <div className="bg-gradient-to-r from-rose-600 to-fuchsia-700 text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 text-sm">
+            <p className="flex-1 text-center font-semibold">
+              🔥 MEGA SALE: Up to 50% OFF on selected items! Free shipping on orders over ৳2000
+            </p>
+            <button
+              onClick={() => setShowAnnouncement(false)}
+              className="ml-4 rounded-full p-1 hover:bg-white/20 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="bg-slate-900 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-1.5 text-xs">
-          <p className="font-medium">Free shipping on orders over $50</p>
           <div className="flex items-center gap-4">
-            <Link href="/orders" className="transition-colors hover:text-orange-400">
+            <p className="font-medium">New season styles, easy exchange, and fast delivery</p>
+            <div className="flex items-center gap-2 text-slate-300">
+              <Phone className="h-3 w-3" />
+              <span>+880 1XXX-XXXXXX</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/orders" className="flex items-center gap-1 transition-colors hover:text-orange-400">
               Track Order
             </Link>
-            <Link href="/account" className="transition-colors hover:text-orange-400">
+            <span className="text-slate-600">|</span>
+            <Link href="/contact" className="flex items-center gap-1 transition-colors hover:text-rose-300">
+              <HeadphonesIcon className="h-3 w-3" />
               Help Center
             </Link>
           </div>
@@ -90,29 +185,45 @@ export default function DesktopHeader() {
         <div className="flex items-center gap-8">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 shadow-lg shadow-orange-200">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-rose-600 to-fuchsia-700 shadow-lg shadow-rose-200">
               <img
                 className="h-7 w-7"
                 alt="Logo"
                 src={import.meta.env.VITE_APP_LOGO || '/favicon.svg'}
               />
             </div>
-            <span className="text-xl font-black text-slate-900">Progotix</span>
+            <span className="text-xl font-black text-slate-900">Kids Mela</span>
           </Link>
 
           {/* Search */}
           <div ref={searchRef} className="relative flex-1 max-w-2xl">
             <form onSubmit={submitSearch} className="flex">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => query.length >= 2 && setShowSuggestions(true)}
-                className="h-11 w-full rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 px-4 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-                placeholder="Search products, brands, categories..."
-              />
+              <div className="flex-1 flex rounded-l-xl border border-slate-300 bg-slate-50 focus-within:border-rose-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-rose-500">
+                <select
+                  value={searchCategory}
+                  onChange={(e) => setSearchCategory(e.target.value)}
+                  className="border-r border-slate-300 bg-transparent px-3 py-3 text-sm font-semibold text-slate-600 outline-none"
+                >
+                  <option value="all">All</option>
+                  <option value="men">Men</option>
+                  <option value="women">Women</option>
+                  <option value="kids">Kids</option>
+                  <option value="accessories">Accessories</option>
+                </select>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => query.length >= 2 && setShowSuggestions(true)}
+                  className="flex-1 border-0 bg-transparent px-4 py-3 text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none"
+                  placeholder="Search dresses, shirts, shoes, brands..."
+                  aria-label="Search products"
+                  autoComplete="off"
+                />
+              </div>
               <button
                 type="submit"
-                className="flex h-11 items-center gap-1.5 rounded-r-xl bg-orange-500 px-5 text-sm font-bold text-white transition-colors hover:bg-orange-600"
+                className="flex h-11 items-center gap-1.5 rounded-r-xl bg-rose-600 px-5 text-sm font-bold text-white transition-colors hover:bg-rose-700"
+                aria-label="Submit search"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
                   <path
@@ -127,8 +238,30 @@ export default function DesktopHeader() {
             </form>
 
             {/* Search dropdown */}
-            {showSuggestions && (suggestions.length > 0 || history.length > 0) && (
+            {showSuggestions && (suggestions.length > 0 || history.length > 0 || trendingSearches.length > 0) && (
               <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-slate-200 bg-white shadow-xl">
+                {trendingSearches.length > 0 && history.length === 0 && query.length < 2 && (
+                  <div className="border-b border-slate-100 px-4 py-3">
+                    <p className="mb-2 text-xs font-bold uppercase text-slate-400">Trending Searches</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {trendingSearches.map((item, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setQuery(item);
+                            setShowSuggestions(false);
+                            addToHistory(item);
+                            router.get('/search', { q: item, category: searchCategory !== 'all' ? searchCategory : undefined });
+                          }}
+                          className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {history.length > 0 && (
                   <div className="border-b border-slate-100 px-4 py-3">
                     <div className="mb-2 flex items-center justify-between">
@@ -150,7 +283,7 @@ export default function DesktopHeader() {
                             setQuery(item);
                             setShowSuggestions(false);
                             addToHistory(item);
-                            router.get('/search', { q: item });
+                            router.get('/search', { q: item, category: searchCategory !== 'all' ? searchCategory : undefined });
                           }}
                           className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200"
                         >
@@ -195,10 +328,25 @@ export default function DesktopHeader() {
                           </p>
                         </div>
                         <p className="text-sm font-bold text-orange-600">
-                          ${Number(product.price ?? 0).toFixed(2)}
+                          {formatMoney(product.price)}
                         </p>
                       </Link>
                     ))}
+                  </div>
+                )}
+                {query.length >= 2 && (
+                  <div className="border-t border-slate-100 px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addToHistory(query);
+                        setShowSuggestions(false);
+                        router.get('/search', { q: query, category: searchCategory !== 'all' ? searchCategory : undefined });
+                      }}
+                      className="w-full rounded-lg bg-rose-50 px-4 py-2 text-center text-sm font-bold text-rose-600 transition-colors hover:bg-rose-100"
+                    >
+                      View all results for "{query}"
+                    </button>
                   </div>
                 )}
               </div>
@@ -207,25 +355,171 @@ export default function DesktopHeader() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1">
-            <Link
-              href="/account"
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
-                <path
-                  d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="hidden xl:inline">Account</span>
-            </Link>
+            {/* Language Selector */}
+            <div ref={langRef} className="relative">
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              >
+                <Globe className="h-4 w-4" />
+                <span className="hidden xl:inline">{availableLanguages[language]?.flag || '🇺🇸'}</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              {showLangMenu && (
+                <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-slate-200 bg-white shadow-xl">
+                  {Object.entries(availableLanguages).map(([code, lang]) => (
+                    <button
+                      key={code}
+                      onClick={() => {
+                        changeLanguage(code);
+                        setShowLangMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Currency Selector */}
+            <div ref={currencyRef} className="relative">
+              <button
+                onClick={() => setShowCurrencyMenu(!showCurrencyMenu)}
+                className="flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              >
+                <DollarSign className="h-4 w-4" />
+                <span className="hidden xl:inline">{currencySymbols[currency] || '$'}</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              {showCurrencyMenu && (
+                <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-slate-200 bg-white shadow-xl">
+                  {availableCurrencies.map((code) => (
+                    <button
+                      key={code}
+                      onClick={() => {
+                        setCurrency(code);
+                        setShowCurrencyMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <span>{currencySymbols[code]}</span>
+                      <span>{code}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* User Account */}
+            <div ref={userMenuRef} className="relative">
+              {auth?.user ? (
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                >
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-sm font-bold text-white">
+                    {auth.user.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="hidden xl:inline">{auth.user.name?.split(' ')[0]}</span>
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="hidden xl:inline">Login</span>
+                </Link>
+              )}
+
+              {showUserMenu && auth?.user && (
+                <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-slate-200 bg-white shadow-xl">
+                  <div className="border-b border-slate-100 px-4 py-3">
+                    <p className="font-bold text-slate-900">{auth.user.name}</p>
+                    <p className="text-xs text-slate-500">{auth.user.email}</p>
+                  </div>
+                  <div className="py-2">
+                    <Link
+                      href="/account"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <User className="h-4 w-4" />
+                      My Account
+                    </Link>
+                    <Link
+                      href="/orders"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                        <path
+                          d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      My Orders
+                    </Link>
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                        <path
+                          d="M12 21s-7-4.4-9.2-8.5C.7 8.6 3.1 4 7.4 4c2 0 3.5 1 4.6 2.4C13.1 5 14.6 4 16.6 4c4.3 0 6.7 4.6 4.6 8.5C19 16.6 12 21 12 21Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Wishlist
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                        <path
+                          d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Settings
+                    </Link>
+                  </div>
+                  <div className="border-t border-slate-100 pt-2">
+                    <button
+                      onClick={() => {
+                        router.post('/logout');
+                        setShowUserMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <Link
               href="/wishlist"
               className="relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Wishlist"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
                 <path
@@ -245,8 +539,9 @@ export default function DesktopHeader() {
             </Link>
 
             <Link
-              href="/cart"
-              className="relative flex items-center gap-2 rounded-xl bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-100"
+            href="/cart"
+              className="relative flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+              aria-label="Cart"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
                 <path
@@ -273,20 +568,115 @@ export default function DesktopHeader() {
         <div className="mx-auto max-w-7xl px-6">
           <nav className="flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link
+              <div
                 key={link.href}
-                href={link.href}
-                className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
-                  isActive(link.href)
-                    ? 'text-orange-600'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className="relative"
+                onMouseEnter={() => link.megaMenu && handleMouseEnter()}
+                onMouseLeave={() => link.megaMenu && handleMouseLeave()}
               >
-                {link.label}
-                {isActive(link.href) && (
-                  <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-orange-500" />
+                {link.megaMenu ? (
+                  <button
+                    onClick={() => handleClick()}
+                    className={`relative flex items-center gap-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      isActive(link.href)
+                        ? 'text-rose-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {link.label}
+                    <ChevronDown className="h-3 w-3" />
+                    {isActive(link.href) && (
+                      <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-rose-600" />
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className={`relative flex items-center gap-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      isActive(link.href)
+                        ? 'text-rose-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {link.label}
+                    {isActive(link.href) && (
+                      <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-rose-600" />
+                    )}
+                  </Link>
                 )}
-              </Link>
+
+                {/* Vertical List Mega Menu */}
+                {link.megaMenu && showMegaMenu && (
+                  <div
+                    ref={megaMenuRef}
+                    className="absolute left-0 top-full z-50 mt-0 w-64 rounded-b-2xl border-t border-slate-200 bg-white shadow-2xl"
+                  >
+                    {categoriesLoading ? (
+                      <div className="p-4 text-center text-sm font-semibold text-slate-500">
+                        Loading categories...
+                      </div>
+                    ) : categories.length === 0 ? (
+                      <div className="p-4 text-center text-sm font-semibold text-slate-500">
+                        No categories available
+                      </div>
+                    ) : (
+                      <div className="py-2">
+                        {categories.map((category) => (
+                          <div key={category.id} className="group">
+                            <Link
+                              href={`/categories?category=${category.id}`}
+                              className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-rose-600"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600">
+                                  {category.icon_url ? (
+                                    <img src={category.icon_url} alt={category.name} className="h-5 w-5" />
+                                  ) : (
+                                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                                      <path d="M4 7l8-4 8 4-8 4-8-4zm0 5l8 4 8-4M4 17l8 4 8-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                  )}
+                                </span>
+                                <span>{category.name}</span>
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-rose-500" />
+                            </Link>
+                            {category.children && category.children.length > 0 && (
+                              <div className="ml-11 border-l border-slate-100 pl-4">
+                                {category.children.slice(0, 5).map((sub) => (
+                                  <Link
+                                    key={sub.id}
+                                    href={`/search?category_id=${category.id}&subcategory=${sub.id}`}
+                                    className="block px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:text-rose-600"
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                ))}
+                                {category.children.length > 5 && (
+                                  <Link
+                                    href={`/categories?category=${category.id}`}
+                                    className="block px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700"
+                                  >
+                                    View all {category.children.length} →
+                                  </Link>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="border-t border-slate-100 bg-slate-50 px-4 py-3">
+                      <Link
+                        href="/categories"
+                        className="block text-center text-sm font-bold text-rose-600 hover:text-rose-700"
+                      >
+                        View All Categories →
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
         </div>

@@ -12,7 +12,7 @@ function TrendingCard({ product, rank }) {
         : 0;
 
     return (
-        <div className="w-[160px] shrink-0 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-100">
+        <div className="w-[160px] shrink-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-gray-100 lg:w-auto">
             <Link href={`/products/${product.id}`} className="block">
                 <div className="relative aspect-[4/5] bg-gray-50">
                     <span className="absolute left-1.5 top-1.5 z-10 grid h-6 w-6 place-items-center rounded-full bg-orange-500 text-[10px] font-bold text-white shadow">
@@ -58,9 +58,9 @@ function TrendingCard({ product, rank }) {
                     <button
                         type="button"
                         onClick={() => addItem(product, 1)}
-                        className="mt-2 h-7 w-full rounded-lg bg-orange-500 text-[11px] font-bold text-white transition-all active:scale-95 active:bg-orange-600"
+                        className="mt-2 h-7 w-full rounded-lg bg-rose-600 text-[11px] font-bold text-white transition-all active:scale-95 active:bg-rose-700"
                     >
-                        Add to Cart
+                        Add Style
                     </button>
                 )}
             </div>
@@ -77,17 +77,17 @@ export default function TrendingProducts({ products = [] }) {
     if (trendingProducts.length === 0) return null;
 
     return (
-        <div className="lg:hidden">
+        <div>
             <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <svg viewBox="0 0 24 24" className="h-5 w-5 text-rose-500" fill="currentColor"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/></svg>
-                    <h2 className="text-base font-bold text-slate-900">Trending Now</h2>
+                    <h2 className="text-base font-bold text-slate-900">Trending Styles</h2>
                 </div>
                 <Link href="/search" className="text-xs font-semibold text-orange-500">
                     View All →
                 </Link>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-5 lg:overflow-visible">
                 {trendingProducts.map((product, index) => (
                     <TrendingCard key={product.id} product={product} rank={index + 1} />
                 ))}

@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@/lib/inertiaCompat';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import MobileShell from '@/Components/Storefront/MobileShell';
 import { useCart } from '@/Contexts/CartContext';
 import { useCoupon } from '@/Contexts/CouponContext';
@@ -8,6 +8,31 @@ import { useToast } from '@/Contexts/ToastContext';
 function money(value) {
     return `$${Number(value ?? 0).toFixed(2)}`;
 }
+
+const SHIPPING_METHODS = [
+    { id: 'standard', label: 'Standard Delivery', timeline: 'Dhaka 1-2 days, outside Dhaka 3-5 days', fee: 60 },
+    { id: 'express', label: 'Express Delivery', timeline: 'Same/next day in supported city areas', fee: 120 },
+    { id: 'pickup', label: 'Store Pickup', timeline: 'Pickup after order confirmation', fee: 0 },
+];
+
+const DELIVERY_TIME_SLOTS = [
+    { id: 'anytime', label: 'Anytime', description: 'Deliver anytime during business hours' },
+    { id: 'morning', label: 'Morning (9AM - 12PM)', description: 'Morning delivery slot' },
+    { id: 'afternoon', label: 'Afternoon (12PM - 5PM)', description: 'Afternoon delivery slot' },
+    { id: 'evening', label: 'Evening (5PM - 9PM)', description: 'Evening delivery slot' },
+];
+
+const BANGLADESH_CITIES = [
+    'Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet', 'Rangpur', 'Barisal', 'Comilla',
+    'Gazipur', 'Narayanganj', 'Mymensingh', 'Bogra', 'Cox\'s Bazar', 'Jessore', 'Dinajpur'
+];
+
+const DHAKA_AREAS = [
+    'Mirpur', 'Uttara', 'Dhanmondi', 'Gulshan', 'Banani', 'Mohammadpur', 'Pallabi', 'Adabor',
+    'Cantonment', 'Dhaka Cantonment', 'Tejgaon', 'Farmgate', 'Motijheel', 'Paltan', 'Baily Road',
+    'Ramna', 'New Market', 'Elephant Road', 'Shahbagh', 'Science Laboratory', 'Dhanmondi 27',
+    'Lalmatia', 'Hazaribagh', 'Kamrangirchar', 'Keraniganj', 'Savar', 'Ashulia', 'Tongi', 'Gazipur Sadar'
+];
 
 const STEPS = [
     { id: 1, label: 'Contact', icon: '👤' },
@@ -24,20 +49,20 @@ function StepIndicator({ currentStep }) {
                     <div className="flex flex-col items-center">
                         <div className={`grid h-9 w-9 place-items-center rounded-full text-sm font-black transition-all duration-300 ${
                             currentStep >= step.id
-                                ? 'bg-orange-600 text-white shadow-md shadow-orange-200'
+                                ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
                                 : 'bg-slate-100 text-slate-400'
                         }`}>
                             {currentStep > step.id ? '✓' : step.icon}
                         </div>
                         <span className={`mt-1 text-[10px] font-bold ${
-                            currentStep >= step.id ? 'text-orange-600' : 'text-slate-400'
+                            currentStep >= step.id ? 'text-rose-600' : 'text-slate-400'
                         }`}>
                             {step.label}
                         </span>
                     </div>
                     {i < STEPS.length - 1 && (
                         <div className={`mx-1 h-0.5 w-8 rounded-full transition-all duration-300 sm:w-12 ${
-                            currentStep > step.id ? 'bg-orange-600' : 'bg-slate-200'
+                            currentStep > step.id ? 'bg-rose-600' : 'bg-slate-200'
                         }`} />
                     )}
                 </div>
@@ -79,20 +104,30 @@ export default function CheckoutPage() {
         saveInfo: false,
         giftWrap: false,
         giftMessage: '',
+        shippingMethod: 'standard',
         paymentMethod: 'cod',
         customerNote: '',
     });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const delivery = itemCount > 0 ? 60 : 0;
+    const selectedShippingMethod = SHIPPING_METHODS.find((method) => method.id === form.shippingMethod) || SHIPPING_METHODS[0];
+    
+    // Address autocomplete states
+    const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+    const [showAreaSuggestions, setShowAreaSuggestions] = useState(false);
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    const [areaSuggestions, setAreaSuggestions] = useState([]);
+    const cityInputRef = useRef(null);
+    const areaInputRef = useRef(null);
+    const delivery = itemCount > 0 ? selectedShippingMethod.fee : 0;
     const discount = calculateDiscount(subtotal);
     const giftWrapFee = form.giftWrap ? 50 : 0;
     const total = subtotal + delivery - discount + giftWrapFee;
 
     const availablePaymentMethods = [
         { id: 'cod', label: 'Cash on Delivery', icon: '💵', enabled: paymentSettings.cod_enabled },
-        { id: 'bkash', label: 'bKash', icon: '📱', enabled: true },
-        { id: 'nagad', label: 'Nagad', icon: '📲', enabled: true },
+        { id: 'bkash', label: 'bKash Manual Payment', icon: '📱', enabled: true, submitsAs: 'cod' },
+        { id: 'nagad', label: 'Nagad Manual Payment', icon: '📲', enabled: true, submitsAs: 'cod' },
         { id: 'stripe', label: 'Card Payment', icon: '💳', enabled: paymentSettings.stripe_enabled },
     ].filter(method => method.enabled);
 
@@ -106,6 +141,46 @@ export default function CheckoutPage() {
 
     const updateField = (field, value) => {
         setForm((current) => ({ ...current, [field]: value }));
+    };
+
+    // City autocomplete handler
+    const handleCityChange = (value) => {
+        updateField('shippingCity', value);
+        if (value.trim().length >= 1) {
+            const filtered = BANGLADESH_CITIES.filter(city =>
+                city.toLowerCase().includes(value.toLowerCase())
+            );
+            setCitySuggestions(filtered);
+            setShowCitySuggestions(filtered.length > 0);
+        } else {
+            setCitySuggestions([]);
+            setShowCitySuggestions(false);
+        }
+    };
+
+    // Area autocomplete handler
+    const handleAreaChange = (value) => {
+        updateField('shippingArea', value);
+        if (value.trim().length >= 1) {
+            const filtered = DHAKA_AREAS.filter(area =>
+                area.toLowerCase().includes(value.toLowerCase())
+            );
+            setAreaSuggestions(filtered);
+            setShowAreaSuggestions(filtered.length > 0);
+        } else {
+            setAreaSuggestions([]);
+            setShowAreaSuggestions(false);
+        }
+    };
+
+    const selectCity = (city) => {
+        updateField('shippingCity', city);
+        setShowCitySuggestions(false);
+    };
+
+    const selectArea = (area) => {
+        updateField('shippingArea', area);
+        setShowAreaSuggestions(false);
     };
 
     const validateStep = (stepNum) => {
@@ -134,6 +209,20 @@ export default function CheckoutPage() {
         event.preventDefault();
         setIsSubmitting(true);
         setErrors({});
+        const selectedPaymentMethod = enabledPaymentMethods.find((method) => method.id === form.paymentMethod);
+        const backendPaymentMethod = selectedPaymentMethod?.submitsAs || form.paymentMethod;
+        const variantLines = items.map((item) => {
+            const size = item.product.selected_size ? `Size: ${item.product.selected_size}` : null;
+            const color = item.product.selected_color ? `Color: ${item.product.selected_color}` : null;
+            return `${item.product.name} (${[size, color].filter(Boolean).join(', ') || 'No variant selected'}) x${item.quantity}`;
+        });
+        const orderNotes = [
+            form.customerNote && `Customer note: ${form.customerNote}`,
+            `Delivery method: ${selectedShippingMethod.label} - ${selectedShippingMethod.timeline}`,
+            form.giftWrap && `Gift wrap requested${form.giftMessage ? `: ${form.giftMessage}` : ''}`,
+            `Fashion variants: ${variantLines.join(' | ')}`,
+            selectedPaymentMethod?.submitsAs && `Payment preference: ${selectedPaymentMethod.label}`,
+        ].filter(Boolean).join('\n');
 
         router.post(
             '/checkout',
@@ -162,11 +251,13 @@ export default function CheckoutPage() {
                 email: form.email,
                 save_info: form.saveInfo,
                 coupon_code: appliedCoupon?.code,
-                payment_method: form.paymentMethod,
-                customer_note: form.customerNote,
+                payment_method: backendPaymentMethod,
+                customer_note: orderNotes,
                 items: items.map((item) => ({
                     product_id: item.product.id,
                     quantity: item.quantity,
+                    selected_size: item.product.selected_size,
+                    selected_color: item.product.selected_color,
                 })),
             },
             {
@@ -186,7 +277,7 @@ export default function CheckoutPage() {
         );
     };
 
-    const inputClass = "h-12 w-full rounded-2xl border-slate-200 px-4 text-sm font-semibold focus:border-orange-500 focus:ring-orange-500";
+    const inputClass = "h-12 w-full rounded-2xl border-slate-200 px-4 text-sm font-semibold focus:border-rose-500 focus:ring-rose-500";
 
     return (
         <MobileShell title="Checkout" showSearch={false}>
@@ -194,11 +285,11 @@ export default function CheckoutPage() {
 
             <section className="space-y-4 px-4 py-4">
                 {/* Header */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-orange-200">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-rose-950 to-fuchsia-900 p-5 text-white shadow-xl shadow-rose-200">
                     <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
                     <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
                     <div className="relative">
-                        <h1 className="text-2xl font-black">Checkout</h1>
+                        <h1 className="text-2xl font-black">Kids Mela Checkout</h1>
                         <p className="mt-1 text-sm font-semibold text-white/90">
                             {user ? 'Complete your order' : 'Guest Checkout'}
                         </p>
@@ -270,7 +361,7 @@ export default function CheckoutPage() {
                                     <button
                                         type="button"
                                         onClick={nextStep}
-                                        className="h-12 w-full rounded-2xl bg-orange-600 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95"
+                                        className="h-12 w-full rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95"
                                     >
                                         Next: Shipping Address →
                                     </button>
@@ -288,20 +379,64 @@ export default function CheckoutPage() {
                                                 <textarea
                                                     value={form.shippingAddress}
                                                     onChange={(e) => updateField('shippingAddress', e.target.value)}
-                                                    className="min-h-20 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-orange-500 focus:ring-orange-500"
+                                                    className="min-h-20 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-rose-500 focus:ring-rose-500"
                                                     placeholder="House, street, landmark"
                                                 />
                                                 {errors.shippingAddress && <p className="mt-1 text-xs font-bold text-red-600">{errors.shippingAddress}</p>}
                                             </div>
                                             <div className="grid grid-cols-2 gap-3">
-                                                <div>
+                                                <div className="relative">
                                                     <label className="mb-2 block text-xs font-bold text-slate-600">City *</label>
-                                                    <input value={form.shippingCity} onChange={(e) => updateField('shippingCity', e.target.value)} className={inputClass} placeholder="Dhaka" />
+                                                    <input
+                                                        ref={cityInputRef}
+                                                        value={form.shippingCity}
+                                                        onChange={(e) => handleCityChange(e.target.value)}
+                                                        onFocus={() => setShowCitySuggestions(citySuggestions.length > 0)}
+                                                        onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
+                                                        className={inputClass}
+                                                        placeholder="Dhaka"
+                                                    />
                                                     {errors.shippingCity && <p className="mt-1 text-xs font-bold text-red-600">{errors.shippingCity}</p>}
+                                                    {showCitySuggestions && citySuggestions.length > 0 && (
+                                                        <div className="absolute z-50 mt-1 w-full rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 max-h-40 overflow-y-auto">
+                                                            {citySuggestions.map((city) => (
+                                                                <button
+                                                                    key={city}
+                                                                    type="button"
+                                                                    onClick={() => selectCity(city)}
+                                                                    className="w-full px-4 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                                                                >
+                                                                    {city}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div>
+                                                <div className="relative">
                                                     <label className="mb-2 block text-xs font-bold text-slate-600">Area</label>
-                                                    <input value={form.shippingArea} onChange={(e) => updateField('shippingArea', e.target.value)} className={inputClass} placeholder="Mirpur" />
+                                                    <input
+                                                        ref={areaInputRef}
+                                                        value={form.shippingArea}
+                                                        onChange={(e) => handleAreaChange(e.target.value)}
+                                                        onFocus={() => setShowAreaSuggestions(areaSuggestions.length > 0)}
+                                                        onBlur={() => setTimeout(() => setShowAreaSuggestions(false), 200)}
+                                                        className={inputClass}
+                                                        placeholder="Mirpur"
+                                                    />
+                                                    {showAreaSuggestions && areaSuggestions.length > 0 && (
+                                                        <div className="absolute z-50 mt-1 w-full rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 max-h-40 overflow-y-auto">
+                                                            {areaSuggestions.map((area) => (
+                                                                <button
+                                                                    key={area}
+                                                                    type="button"
+                                                                    onClick={() => selectArea(area)}
+                                                                    className="w-full px-4 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                                                                >
+                                                                    {area}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-2 gap-3">
@@ -320,7 +455,7 @@ export default function CheckoutPage() {
                                                         type="checkbox"
                                                         checked={form.billingSameAsShipping}
                                                         onChange={(e) => updateField('billingSameAsShipping', e.target.checked)}
-                                                        className="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                                                        className="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
                                                     />
                                                     Billing address same as shipping
                                                 </label>
@@ -330,7 +465,7 @@ export default function CheckoutPage() {
                                                     <h3 className="text-sm font-black text-slate-700">Billing Address</h3>
                                                     <input value={form.billingName} onChange={(e) => updateField('billingName', e.target.value)} className={inputClass} placeholder="Billing name" />
                                                     <input value={form.billingPhone} onChange={(e) => updateField('billingPhone', e.target.value)} className={inputClass} placeholder="Billing phone" />
-                                                    <textarea value={form.billingAddress} onChange={(e) => updateField('billingAddress', e.target.value)} className="min-h-20 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-orange-500 focus:ring-orange-500" placeholder="Billing address" />
+                                                    <textarea value={form.billingAddress} onChange={(e) => updateField('billingAddress', e.target.value)} className="min-h-20 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-rose-500 focus:ring-rose-500" placeholder="Billing address" />
                                                     <div className="grid grid-cols-2 gap-3">
                                                         <input value={form.billingCity} onChange={(e) => updateField('billingCity', e.target.value)} className={inputClass} placeholder="City" />
                                                         <input value={form.billingArea} onChange={(e) => updateField('billingArea', e.target.value)} className={inputClass} placeholder="Area" />
@@ -342,17 +477,40 @@ export default function CheckoutPage() {
                                                 <textarea
                                                     value={form.customerNote}
                                                     onChange={(e) => updateField('customerNote', e.target.value)}
-                                                    className="min-h-16 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-orange-500 focus:ring-orange-500"
+                                                    className="min-h-16 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-rose-500 focus:ring-rose-500"
                                                     placeholder="Delivery instructions"
                                                 />
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                        <h2 className="text-lg font-black text-slate-950">Delivery Method</h2>
+                                        <div className="mt-4 space-y-2">
+                                            {SHIPPING_METHODS.map((method) => (
+                                                <button
+                                                    key={method.id}
+                                                    type="button"
+                                                    onClick={() => updateField('shippingMethod', method.id)}
+                                                    className={`flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-4 text-left ring-1 transition-all duration-200 ${
+                                                        form.shippingMethod === method.id
+                                                            ? 'bg-rose-50 text-rose-700 ring-rose-300'
+                                                            : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    <span>
+                                                        <span className="block text-sm font-black">{method.label}</span>
+                                                        <span className="mt-1 block text-xs font-semibold text-slate-500">{method.timeline}</span>
+                                                    </span>
+                                                    <span className="shrink-0 text-sm font-black">{money(method.fee)}</span>
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
                                         <button type="button" onClick={prevStep} className="h-12 flex-1 rounded-2xl bg-slate-100 text-sm font-black text-slate-700 transition-all duration-200 hover:bg-slate-200 active:scale-95">
                                             ← Previous
                                         </button>
-                                        <button type="button" onClick={nextStep} className="h-12 flex-[2] rounded-2xl bg-orange-600 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95">
+                                        <button type="button" onClick={nextStep} className="h-12 flex-[2] rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95">
                                             Next: Payment →
                                         </button>
                                     </div>
@@ -372,18 +530,23 @@ export default function CheckoutPage() {
                                                     onClick={() => updateField('paymentMethod', method.id)}
                                                     className={`flex w-full items-center gap-3 rounded-2xl px-4 py-4 text-left text-sm font-black ring-1 transition-all duration-200 ${
                                                         form.paymentMethod === method.id
-                                                            ? 'bg-orange-50 text-orange-700 ring-orange-300'
+                                                            ? 'bg-rose-50 text-rose-700 ring-rose-300'
                                                             : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
                                                     }`}
                                                 >
                                                     <span className="text-xl">{method.icon}</span>
                                                     <span>{method.label}</span>
                                                     {form.paymentMethod === method.id && (
-                                                        <span className="ml-auto grid h-5 w-5 place-items-center rounded-full bg-orange-600 text-xs text-white">✓</span>
+                                                        <span className="ml-auto grid h-5 w-5 place-items-center rounded-full bg-rose-600 text-xs text-white">✓</span>
                                                     )}
                                                 </button>
                                             ))}
                                         </div>
+                                        {enabledPaymentMethods.find((method) => method.id === form.paymentMethod)?.submitsAs && (
+                                            <p className="mt-3 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
+                                                Manual mobile payment will be confirmed by Kids Mela support after order placement.
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Gift Wrap */}
@@ -417,7 +580,7 @@ export default function CheckoutPage() {
                                             id="saveInfo"
                                             checked={form.saveInfo}
                                             onChange={(e) => updateField('saveInfo', e.target.checked)}
-                                            className="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                                            className="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
                                         />
                                         <label htmlFor="saveInfo" className="text-sm font-semibold text-slate-700">
                                             Save info for next time
@@ -428,7 +591,7 @@ export default function CheckoutPage() {
                                         <button type="button" onClick={prevStep} className="h-12 flex-1 rounded-2xl bg-slate-100 text-sm font-black text-slate-700 transition-all duration-200 hover:bg-slate-200 active:scale-95">
                                             ← Previous
                                         </button>
-                                        <button type="button" onClick={nextStep} className="h-12 flex-[2] rounded-2xl bg-orange-600 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95">
+                                        <button type="button" onClick={nextStep} className="h-12 flex-[2] rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95">
                                             Next: Review →
                                         </button>
                                     </div>
@@ -461,6 +624,7 @@ export default function CheckoutPage() {
                                             <p>{form.shippingAddress}</p>
                                             <p>{[form.shippingArea, form.shippingCity, form.shippingPostcode].filter(Boolean).join(', ')}</p>
                                             <p>{form.shippingCountry}</p>
+                                            <p className="mt-2 font-black text-rose-700">{selectedShippingMethod.label}: {selectedShippingMethod.timeline}</p>
                                         </div>
                                     </div>
 
@@ -492,8 +656,13 @@ export default function CheckoutPage() {
                                                     <div className="min-w-0 flex-1">
                                                         <p className="truncate text-sm font-black text-slate-950">{item.product.name}</p>
                                                         <p className="text-xs font-bold text-slate-500">x{item.quantity}</p>
+                                                        {(item.product.selected_size || item.product.selected_color) && (
+                                                            <p className="mt-0.5 text-[11px] font-black text-rose-600">
+                                                                {[item.product.selected_size && `Size ${item.product.selected_size}`, item.product.selected_color && item.product.selected_color].filter(Boolean).join(' / ')}
+                                                            </p>
+                                                        )}
                                                     </div>
-                                                    <p className="text-sm font-black text-orange-600">
+                                                    <p className="text-sm font-black text-rose-600">
                                                         {money(Number(item.product.price) * item.quantity)}
                                                     </p>
                                                 </div>
@@ -522,7 +691,7 @@ export default function CheckoutPage() {
                                             )}
                                             <div className="flex justify-between border-t border-slate-200 pt-2 text-lg font-black text-slate-950">
                                                 <span>Total</span>
-                                                <span className="text-orange-600">{money(total)}</span>
+                                                <span className="text-rose-600">{money(total)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -551,7 +720,7 @@ export default function CheckoutPage() {
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="h-12 flex-[2] rounded-2xl bg-orange-600 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95 disabled:bg-slate-300"
+                                            className="h-12 flex-[2] rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95 disabled:bg-slate-300"
                                         >
                                             {isSubmitting ? 'Ordering...' : 'Confirm Order'}
                                         </button>
