@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../lib/adminApi';
 import { Settings, Save, Globe, DollarSign, Bell, Shield, Truck } from 'lucide-react';
+import AdminTabNavigation from '@/Components/Admin/AdminTabNavigation';
 
 export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  const tabs = [
+    { id: 'general', label: 'General' },
+    { id: 'store', label: 'Store' },
+    { id: 'payment', label: 'Payment' },
+    { id: 'shipping', label: 'Shipping' },
+    { id: 'notifications', label: 'Notifications' },
+    { id: 'security', label: 'Security' },
+  ];
 
   useEffect(() => {
     loadSettings();
@@ -61,36 +72,38 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-          <p className="text-slate-600 mt-1">Manage your store configuration</p>
-        </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 transition-colors disabled:opacity-50"
-        >
-          <Save className="w-5 h-5" />
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </div>
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <p className="text-green-700">Settings saved successfully!</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <p className="text-red-700">{error}</p>
-        </div>
-      )}
+      <AdminTabNavigation tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="space-y-6">
-        {/* General Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+            <p className="text-sm text-slate-600">Manage your store configuration</p>
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 transition-colors disabled:opacity-50"
+          >
+            <Save className="w-5 h-5" />
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-700">Settings saved successfully!</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
+        {activeTab === 'general' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Globe className="w-5 h-5 text-slate-600" />
             <h2 className="text-lg font-bold text-slate-900">General Settings</h2>
@@ -143,9 +156,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Store Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        {activeTab === 'store' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Settings className="w-5 h-5 text-slate-600" />
             <h2 className="text-lg font-bold text-slate-900">Store Settings</h2>
@@ -189,32 +203,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Currency Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <DollarSign className="w-5 h-5 text-slate-600" />
-            <h2 className="text-lg font-bold text-slate-900">Currency Settings</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Default Currency</label>
-              <select
-                value={settings?.currencies?.default_currency || 'BDT'}
-                onChange={(e) => updateSetting('currencies', 'default_currency', e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="BDT">Bangladeshi Taka (BDT)</option>
-                <option value="USD">US Dollar (USD)</option>
-                <option value="EUR">Euro (EUR)</option>
-                <option value="GBP">British Pound (GBP)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        {activeTab === 'payment' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-5 h-5 text-slate-600" />
             <h2 className="text-lg font-bold text-slate-900">Payment Settings</h2>
@@ -267,9 +259,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Shipping Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        {activeTab === 'shipping' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Truck className="w-5 h-5 text-slate-600" />
             <h2 className="text-lg font-bold text-slate-900">Shipping Settings</h2>
@@ -279,8 +272,8 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Free Shipping Threshold (BDT)</label>
               <input
                 type="number"
-                value={settings?.shipping?.free_shipping_threshold || 50}
-                onChange={(e) => updateSetting('shipping', 'free_shipping_threshold', parseFloat(e.target.value))}
+                value={settings?.shipping?.free_shipping_threshold || 0}
+                onChange={(e) => updateSetting('shipping', 'free_shipping_threshold', Number(e.target.value))}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
               />
             </div>
@@ -288,16 +281,17 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Default Shipping Fee (BDT)</label>
               <input
                 type="number"
-                value={settings?.shipping?.default_shipping_fee || 5.99}
-                onChange={(e) => updateSetting('shipping', 'default_shipping_fee', parseFloat(e.target.value))}
+                value={settings?.shipping?.default_shipping_fee || 60}
+                onChange={(e) => updateSetting('shipping', 'default_shipping_fee', Number(e.target.value))}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
               />
             </div>
           </div>
         </div>
+        )}
 
-        {/* Notification Settings */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        {activeTab === 'notifications' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Bell className="w-5 h-5 text-slate-600" />
             <h2 className="text-lg font-bold text-slate-900">Notification Settings</h2>
@@ -305,29 +299,14 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-slate-900">New Order Notifications</p>
-                <p className="text-sm text-slate-600">Get notified for new orders</p>
+                <p className="font-medium text-slate-900">Order Notifications</p>
+                <p className="text-sm text-slate-600">Send email on new orders</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={settings?.notifications?.new_order_notifications || false}
-                  onChange={(e) => updateSetting('notifications', 'new_order_notifications', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-slate-900">Low Stock Alerts</p>
-                <p className="text-sm text-slate-600">Get notified when stock is low</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings?.notifications?.low_stock_alerts || false}
-                  onChange={(e) => updateSetting('notifications', 'low_stock_alerts', e.target.checked)}
+                  checked={settings?.notifications?.order_emails || true}
+                  onChange={(e) => updateSetting('notifications', 'order_emails', e.target.checked)}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
@@ -335,6 +314,27 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+        )}
+
+        {activeTab === 'security' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Shield className="w-5 h-5 text-slate-600" />
+            <h2 className="text-lg font-bold text-slate-900">Security Settings</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Admin Email</label>
+              <input
+                type="email"
+                value={settings?.security?.admin_email || ''}
+                onChange={(e) => updateSetting('security', 'admin_email', e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+              />
+            </div>
+          </div>
+        </div>
+        )}
       </div>
     </div>
   );

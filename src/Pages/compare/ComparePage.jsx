@@ -16,7 +16,7 @@ export default function ComparePage() {
 
     if (items.length === 0) {
         return (
-            <MobileShell title="Compare" showSearch={false}>
+            <MobileShell title="Compare" showSearch={false} simpleHeader={true}>
                 <Head title="Compare Products" />
                 <section className="space-y-4 px-4 py-4">
                     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 p-5 text-white shadow-xl shadow-blue-200">
@@ -50,7 +50,7 @@ export default function ComparePage() {
     }
 
     return (
-        <MobileShell title="Compare" showSearch={false}>
+        <MobileShell title="Compare" showSearch={false} simpleHeader={true}>
             <Head title="Compare Products" />
             <section className="space-y-4 px-4 py-4">
                 <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 p-5 text-white shadow-xl shadow-blue-200">

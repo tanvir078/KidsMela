@@ -2,6 +2,7 @@ import { Head, Link } from '@/lib/inertiaCompat';
 import { useState } from 'react';
 import MobileShell from '@/Components/Storefront/MobileShell';
 import { useToast } from '@/Contexts/ToastContext';
+import { Input, Textarea, Button } from '@/Components/UI';
 
 export default function ContactPage() {
     const { addToast } = useToast();
@@ -43,11 +44,11 @@ export default function ContactPage() {
     };
 
     return (
-        <MobileShell title="Contact Us">
+        <MobileShell title="Contact Us" simpleHeader={true}>
             <Head title="Contact Us" />
 
             <section className="space-y-4 px-4 py-4">
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-orange-200">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-rose-200">
                     <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
                     <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
                     <div className="relative">
@@ -61,84 +62,73 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-200">
                     <h2 className="text-lg font-black text-slate-950">Send us a message</h2>
                     <form onSubmit={submit} className="mt-4 space-y-4">
-                        <div>
-                            <label className="mb-2 block text-xs font-bold text-slate-600">Name</label>
-                            <input
-                                type="text"
-                                value={form.name}
-                                onChange={(e) => update('name', e.target.value)}
-                                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="Your name"
-                            />
-                            {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
-                        </div>
+                        <Input
+                            label="Name"
+                            value={form.name}
+                            onChange={(e) => update('name', e.target.value)}
+                            error={errors.name}
+                            placeholder="Your name"
+                            required
+                        />
 
-                        <div>
-                            <label className="mb-2 block text-xs font-bold text-slate-600">Email</label>
-                            <input
-                                type="email"
-                                value={form.email}
-                                onChange={(e) => update('email', e.target.value)}
-                                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="your@email.com"
-                            />
-                            {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
-                        </div>
+                        <Input
+                            label="Email"
+                            type="email"
+                            value={form.email}
+                            onChange={(e) => update('email', e.target.value)}
+                            error={errors.email}
+                            placeholder="your@email.com"
+                            required
+                        />
 
-                        <div>
-                            <label className="mb-2 block text-xs font-bold text-slate-600">Phone</label>
-                            <input
-                                type="tel"
-                                value={form.phone}
-                                onChange={(e) => update('phone', e.target.value)}
-                                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="01XXXXXXXXX"
-                            />
-                            {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
-                        </div>
+                        <Input
+                            label="Phone"
+                            type="tel"
+                            value={form.phone}
+                            onChange={(e) => update('phone', e.target.value)}
+                            error={errors.phone}
+                            placeholder="01XXXXXXXXX"
+                            required
+                        />
 
-                        <div>
-                            <label className="mb-2 block text-xs font-bold text-slate-600">Subject</label>
-                            <input
-                                type="text"
-                                value={form.subject}
-                                onChange={(e) => update('subject', e.target.value)}
-                                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="How can we help?"
-                            />
-                            {errors.subject && <p className="mt-1 text-xs text-red-600">{errors.subject}</p>}
-                        </div>
+                        <Input
+                            label="Subject"
+                            value={form.subject}
+                            onChange={(e) => update('subject', e.target.value)}
+                            error={errors.subject}
+                            placeholder="How can we help?"
+                            required
+                        />
 
-                        <div>
-                            <label className="mb-2 block text-xs font-bold text-slate-600">Message</label>
-                            <textarea
-                                value={form.message}
-                                onChange={(e) => update('message', e.target.value)}
-                                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-orange-500 focus:outline-none"
-                                rows={4}
-                                placeholder="Tell us more..."
-                            />
-                            {errors.message && <p className="mt-1 text-xs text-red-600">{errors.message}</p>}
-                        </div>
+                        <Textarea
+                            label="Message"
+                            value={form.message}
+                            onChange={(e) => update('message', e.target.value)}
+                            error={errors.message}
+                            placeholder="Tell us more..."
+                            rows={4}
+                            required
+                        />
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full rounded-2xl bg-orange-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95 disabled:opacity-50"
+                            loading={isSubmitting}
+                            className="w-full"
                         >
                             {isSubmitting ? 'Sending...' : 'Send Message'}
-                        </button>
+                        </Button>
                     </form>
                 </div>
 
-                <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-200">
                     <h2 className="text-lg font-black text-slate-950">Contact Information</h2>
                     <div className="mt-4 space-y-4 text-sm">
                         <div className="flex items-start gap-3">
-                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-100 text-orange-600">
+                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-600">
                                 <span className="text-lg">📍</span>
                             </div>
                             <div>
@@ -148,7 +138,7 @@ export default function ContactPage() {
                         </div>
 
                         <div className="flex items-start gap-3">
-                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-100 text-orange-600">
+                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-600">
                                 <span className="text-lg">📞</span>
                             </div>
                             <div>
@@ -158,7 +148,7 @@ export default function ContactPage() {
                         </div>
 
                         <div className="flex items-start gap-3">
-                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-100 text-orange-600">
+                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-600">
                                 <span className="text-lg">✉️</span>
                             </div>
                             <div>
@@ -168,7 +158,7 @@ export default function ContactPage() {
                         </div>
 
                         <div className="flex items-start gap-3">
-                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-orange-100 text-orange-600">
+                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-600">
                                 <span className="text-lg">⏰</span>
                             </div>
                             <div>
@@ -180,19 +170,19 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-200">
                     <h2 className="text-lg font-black text-slate-950">Follow Us</h2>
                     <div className="mt-4 flex gap-3">
-                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-blue-600 text-white transition-all hover:bg-blue-700">
+                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-blue-600 text-white transition-all hover:bg-blue-700 hover:scale-110">
                             <span className="text-lg">f</span>
                         </a>
-                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-pink-600 text-white transition-all hover:bg-pink-700">
+                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-pink-600 text-white transition-all hover:bg-pink-700 hover:scale-110">
                             <span className="text-lg">📷</span>
                         </a>
-                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-sky-500 text-white transition-all hover:bg-sky-600">
+                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-sky-500 text-white transition-all hover:bg-sky-600 hover:scale-110">
                             <span className="text-lg">🐦</span>
                         </a>
-                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-red-600 text-white transition-all hover:bg-red-700">
+                        <a href="#" className="grid h-12 w-12 place-items-center rounded-full bg-red-600 text-white transition-all hover:bg-red-700 hover:scale-110">
                             <span className="text-lg">▶</span>
                         </a>
                     </div>

@@ -47,21 +47,21 @@ function StepIndicator({ currentStep }) {
             {STEPS.map((step, i) => (
                 <div key={step.id} className="flex items-center">
                     <div className="flex flex-col items-center">
-                        <div className={`grid h-9 w-9 place-items-center rounded-full text-sm font-black transition-all duration-300 ${
+                        <div className={`grid h-10 w-10 place-items-center rounded-full text-sm font-black transition-all duration-300 ${
                             currentStep >= step.id
-                                ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
+                                ? 'bg-rose-600 text-white shadow-lg shadow-rose-200'
                                 : 'bg-slate-100 text-slate-400'
                         }`}>
                             {currentStep > step.id ? '✓' : step.icon}
                         </div>
-                        <span className={`mt-1 text-[10px] font-bold ${
+                        <span className={`mt-2 text-[10px] font-bold ${
                             currentStep >= step.id ? 'text-rose-600' : 'text-slate-400'
                         }`}>
                             {step.label}
                         </span>
                     </div>
                     {i < STEPS.length - 1 && (
-                        <div className={`mx-1 h-0.5 w-8 rounded-full transition-all duration-300 sm:w-12 ${
+                        <div className={`mx-2 h-0.5 w-10 rounded-full transition-all duration-300 sm:w-16 ${
                             currentStep > step.id ? 'bg-rose-600' : 'bg-slate-200'
                         }`} />
                     )}
@@ -141,6 +141,10 @@ export default function CheckoutPage() {
 
     const updateField = (field, value) => {
         setForm((current) => ({ ...current, [field]: value }));
+        // Clear error for this field when user starts typing
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: null }));
+        }
     };
 
     // City autocomplete handler
@@ -277,10 +281,10 @@ export default function CheckoutPage() {
         );
     };
 
-    const inputClass = "h-12 w-full rounded-2xl border-slate-200 px-4 text-sm font-semibold focus:border-rose-500 focus:ring-rose-500";
+    const inputClass = "h-12 w-full rounded-2xl border-2 border-slate-200 px-4 text-sm font-semibold focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all duration-300";
 
     return (
-        <MobileShell title="Checkout" showSearch={false}>
+        <MobileShell title="Checkout" showSearch={false} simpleHeader={true}>
             <Head title="Checkout" />
 
             <section className="space-y-4 px-4 py-4">
@@ -297,16 +301,16 @@ export default function CheckoutPage() {
                 </div>
 
                 {items.length === 0 ? (
-                    <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-8 text-center shadow-sm ring-1 ring-slate-200">
-                        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-slate-200">
-                            <svg viewBox="0 0 24 24" className="h-12 w-12 text-slate-400" fill="none" aria-hidden="true">
+                    <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-12 text-center shadow-xl ring-1 ring-slate-200">
+                        <div className="mx-auto grid h-32 w-32 place-items-center rounded-full bg-rose-100">
+                            <svg viewBox="0 0 24 24" className="h-16 w-16 text-rose-600" fill="none" aria-hidden="true">
                                 <path d="M4 5h2l1.4 9.2a2 2 0 0 0 2 1.8h6.8a2 2 0 0 0 1.9-1.4L20 8H7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                                 <circle cx="9" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
                                 <circle cx="20" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">Cart is empty</h2>
-                        <Link href="/" className="mt-6 inline-flex rounded-2xl bg-orange-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95">
+                        <h2 className="mt-6 text-2xl font-black text-slate-950">Cart is empty</h2>
+                        <Link href="/" className="mt-6 inline-flex rounded-2xl bg-rose-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 hover:scale-105">
                             Shop Now
                         </Link>
                     </div>
@@ -361,7 +365,7 @@ export default function CheckoutPage() {
                                     <button
                                         type="button"
                                         onClick={nextStep}
-                                        className="h-12 w-full rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95"
+                                        className="h-12 w-full rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 active:scale-95"
                                     >
                                         Next: Shipping Address →
                                     </button>
@@ -371,7 +375,7 @@ export default function CheckoutPage() {
                             {/* Step 2: Shipping */}
                             {step === 2 && (
                                 <div className="space-y-4">
-                                    <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                    <div className="rounded-3xl bg-white p-4 shadow-md ring-1 ring-slate-200">
                                         <h2 className="text-lg font-black text-slate-950">Shipping Address</h2>
                                         <div className="mt-4 space-y-3">
                                             <div>
@@ -379,7 +383,7 @@ export default function CheckoutPage() {
                                                 <textarea
                                                     value={form.shippingAddress}
                                                     onChange={(e) => updateField('shippingAddress', e.target.value)}
-                                                    className="min-h-20 w-full rounded-2xl border-slate-200 px-4 py-3 text-sm font-semibold focus:border-rose-500 focus:ring-rose-500"
+                                                    className="min-h-20 w-full rounded-2xl border-2 border-slate-200 px-4 py-3 text-sm font-semibold focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all duration-300"
                                                     placeholder="House, street, landmark"
                                                 />
                                                 {errors.shippingAddress && <p className="mt-1 text-xs font-bold text-red-600">{errors.shippingAddress}</p>}
@@ -483,18 +487,18 @@ export default function CheckoutPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                    <div className="rounded-3xl bg-white p-4 shadow-md ring-1 ring-slate-200">
                                         <h2 className="text-lg font-black text-slate-950">Delivery Method</h2>
-                                        <div className="mt-4 space-y-2">
+                                        <div className="mt-4 space-y-3">
                                             {SHIPPING_METHODS.map((method) => (
                                                 <button
                                                     key={method.id}
                                                     type="button"
                                                     onClick={() => updateField('shippingMethod', method.id)}
-                                                    className={`flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-4 text-left ring-1 transition-all duration-200 ${
+                                                    className={`flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-4 text-left ring-2 transition-all duration-300 ${
                                                         form.shippingMethod === method.id
-                                                            ? 'bg-rose-50 text-rose-700 ring-rose-300'
-                                                            : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
+                                                            ? 'bg-rose-50 text-rose-700 ring-rose-500 shadow-md'
+                                                            : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300'
                                                     }`}
                                                 >
                                                     <span>
@@ -520,37 +524,37 @@ export default function CheckoutPage() {
                             {/* Step 3: Payment */}
                             {step === 3 && (
                                 <div className="space-y-4">
-                                    <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                    <div className="rounded-3xl bg-white p-4 shadow-md ring-1 ring-slate-200">
                                         <h2 className="text-lg font-black text-slate-950">Payment Method</h2>
-                                        <div className="mt-4 space-y-2">
+                                        <div className="mt-4 space-y-3">
                                             {enabledPaymentMethods.map((method) => (
                                                 <button
                                                     key={method.id}
                                                     type="button"
                                                     onClick={() => updateField('paymentMethod', method.id)}
-                                                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-4 text-left text-sm font-black ring-1 transition-all duration-200 ${
+                                                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-4 text-left text-sm font-black ring-2 transition-all duration-300 ${
                                                         form.paymentMethod === method.id
-                                                            ? 'bg-rose-50 text-rose-700 ring-rose-300'
-                                                            : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'
+                                                            ? 'bg-rose-50 text-rose-700 ring-rose-500 shadow-md'
+                                                            : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300'
                                                     }`}
                                                 >
                                                     <span className="text-xl">{method.icon}</span>
                                                     <span>{method.label}</span>
                                                     {form.paymentMethod === method.id && (
-                                                        <span className="ml-auto grid h-5 w-5 place-items-center rounded-full bg-rose-600 text-xs text-white">✓</span>
+                                                        <span className="ml-auto grid h-6 w-6 place-items-center rounded-full bg-rose-600 text-xs text-white shadow-md">✓</span>
                                                     )}
                                                 </button>
                                             ))}
                                         </div>
                                         {enabledPaymentMethods.find((method) => method.id === form.paymentMethod)?.submitsAs && (
-                                            <p className="mt-3 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
+                                            <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
                                                 Manual mobile payment will be confirmed by Kids Mela support after order placement.
                                             </p>
                                         )}
                                     </div>
 
                                     {/* Gift Wrap */}
-                                    <div className="rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 p-4 ring-1 ring-purple-200">
+                                    <div className="rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 p-4 shadow-md ring-1 ring-purple-200">
                                         <label className="flex items-center gap-2 text-sm font-black text-purple-700">
                                             <input
                                                 type="checkbox"
@@ -565,7 +569,7 @@ export default function CheckoutPage() {
                                                 <textarea
                                                     value={form.giftMessage}
                                                     onChange={(e) => updateField('giftMessage', e.target.value)}
-                                                    className="min-h-16 w-full rounded-xl border-slate-200 px-3 py-2 text-sm font-semibold focus:border-purple-500 focus:ring-purple-500"
+                                                    className="min-h-16 w-full rounded-xl border-2 border-slate-200 px-3 py-2 text-sm font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all duration-300"
                                                     placeholder="Write a gift message..."
                                                     maxLength={200}
                                                 />
@@ -574,7 +578,7 @@ export default function CheckoutPage() {
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                                    <div className="flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200 transition-all hover:bg-slate-100">
                                         <input
                                             type="checkbox"
                                             id="saveInfo"
@@ -588,10 +592,10 @@ export default function CheckoutPage() {
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button type="button" onClick={prevStep} className="h-12 flex-1 rounded-2xl bg-slate-100 text-sm font-black text-slate-700 transition-all duration-200 hover:bg-slate-200 active:scale-95">
+                                        <button type="button" onClick={prevStep} className="h-12 flex-1 rounded-2xl bg-slate-100 text-sm font-black text-slate-700 transition-all duration-300 hover:bg-slate-200 active:scale-95">
                                             ← Previous
                                         </button>
-                                        <button type="button" onClick={nextStep} className="h-12 flex-[2] rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95">
+                                        <button type="button" onClick={nextStep} className="h-12 flex-[2] rounded-2xl bg-rose-600 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 active:scale-95">
                                             Next: Review →
                                         </button>
                                     </div>

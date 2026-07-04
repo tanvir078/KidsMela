@@ -58,7 +58,7 @@ export default function SizeGuidePage() {
     const [activeType, setActiveType] = useState('tops');
 
     return (
-        <MobileShell title="Size Guide">
+        <MobileShell title="Size Guide" simpleHeader={true}>
             <Head title="Size Guide" />
 
             <section className="space-y-4 px-4 py-4">

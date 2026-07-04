@@ -7,7 +7,7 @@ export default function RecentlyViewedPage() {
     const { items, clearItems } = useRecentlyViewed();
 
     return (
-        <MobileShell title="Recently Viewed">
+        <MobileShell title="Recently Viewed" simpleHeader={true}>
             <Head title="Recently Viewed" />
 
             <section className="space-y-4 px-4 py-4">

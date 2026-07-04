@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../lib/adminApi';
 import { ShoppingCart, Search, Filter, Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
+import AdminTabNavigation from '@/Components/Admin/AdminTabNavigation';
 
 export default function OrdersPage() {
+  const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,16 +12,25 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const tabs = [
+    { id: 'all', label: 'All Orders' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'processing', label: 'Processing' },
+    { id: 'shipped', label: 'Shipped' },
+    { id: 'delivered', label: 'Delivered' },
+    { id: 'cancelled', label: 'Cancelled' },
+  ];
+
   useEffect(() => {
     loadOrders();
-  }, [statusFilter]);
+  }, [activeTab, statusFilter]);
 
   const loadOrders = async () => {
     try {
       setLoading(true);
       const params = {};
       if (searchTerm) params.search = searchTerm;
-      if (statusFilter) params.status = statusFilter;
+      if (activeTab !== 'all') params.status = activeTab;
       
       const data = await adminApi.orders(params);
       setOrders(data.data || []);
@@ -77,15 +88,19 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Orders</h1>
-        <p className="text-slate-600 mt-1">Manage customer orders</p>
-      </div>
+      <AdminTabNavigation tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Search and Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
+            <p className="text-sm text-slate-600">Manage customer orders</p>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+          <div className="relative">
             <Search className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -95,30 +110,10 @@ export default function OrdersPage() {
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-          >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <button
-            onClick={loadOrders}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors"
-          >
-            <Filter className="w-5 h-5" />
-            Apply Filters
-          </button>
         </div>
-      </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+        {/* Orders Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -205,6 +200,7 @@ export default function OrdersPage() {
             <p className="text-slate-500">No orders found</p>
           </div>
         )}
+      </div>
       </div>
 
       {/* Order Details Modal */}

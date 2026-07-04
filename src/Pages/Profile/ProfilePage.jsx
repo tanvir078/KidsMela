@@ -99,7 +99,7 @@ export default function ProfilePage() {
     const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
     return (
-        <MobileShell title="My Account" showSearch={false}>
+        <MobileShell title="My Account" showSearch={false} simpleHeader={true}>
             <Head title="My Account" />
             <section className="space-y-3 px-4 py-4 pb-8">
 
@@ -135,10 +135,10 @@ export default function ProfilePage() {
                     {/* Stats Row */}
                     <div className="relative mt-5 grid grid-cols-4 gap-2">
                         {[
-                            { value: '12', label: 'Orders' },
+                            { value: user?.orders_count || '0', label: 'Orders' },
                             { value: String(wishlistItems?.length || 0), label: 'Wishlist' },
                             { value: String(cartCount || 0), label: 'Cart' },
-                            { value: '150', label: 'Points' },
+                            { value: user?.points || '0', label: 'Points' },
                         ].map((stat) => (
                             <div key={stat.label} className="rounded-2xl bg-white/5 px-2 py-3 text-center backdrop-blur-sm">
                                 <p className="text-lg font-black text-white">{stat.value}</p>

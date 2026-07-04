@@ -55,7 +55,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <MobileShell title="Register" showSearch={false}>
+        <MobileShell title="Register" showSearch={false} simpleHeader={true}>
             <Head title="Register" />
 
             <section className="min-h-[80vh] px-4 py-6">

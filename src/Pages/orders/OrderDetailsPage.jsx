@@ -43,7 +43,7 @@ export default function OrderDetailsPage({ order }) {
     };
 
     return (
-        <MobileShell title={`Order #${order.id}`} showSearch={false}>
+        <MobileShell title={`Order #${order.id}`} showSearch={false} simpleHeader={true}>
             <Head title={`Order #${order.id}`} />
 
             <section className="space-y-4 px-4 py-4">

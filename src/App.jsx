@@ -15,6 +15,7 @@ import { NotificationProvider } from './Contexts/NotificationContext';
 import { AuthProvider } from './Contexts/AuthContext';
 import HomePage from './Pages/home/HomePage';
 import CategoriesPage from './Pages/categories/CategoriesPage';
+import CategoryDetailPage from './Pages/categories/CategoryDetailPage';
 import CampaignsPage from './Pages/campaigns/CampaignsPage';
 import SearchPage from './Pages/search/SearchPage';
 import ProductDetailsPage from './Pages/products/ProductDetailsPage';
@@ -54,13 +55,28 @@ import AnalyticsPage from './Pages/admin/AnalyticsPage';
 import SettingsPage from './Pages/admin/SettingsPage';
 import BannersPage from './Pages/admin/BannersPage';
 import FooterSettingsPage from './Pages/admin/FooterSettingsPage';
+import AdminCategoriesPage from './Pages/admin/CategoriesPage';
+import SubmenusPage from './Pages/admin/SubmenusPage';
+import PagesPage from './Pages/admin/cms/PagesPage';
+import MediaLibraryPage from './Pages/admin/cms/MediaLibraryPage';
+import MenusPage from './Pages/admin/cms/MenusPage';
+import FaqPage from './Pages/admin/cms/FaqPage';
+import BrandsPage from './Pages/admin/BrandsPage';
+import AdminShippingPage from './Pages/admin/ShippingPage';
+import PaymentsPage from './Pages/admin/PaymentsPage';
+import AttributesPage from './Pages/admin/AttributesPage';
+import InventoryPage from './Pages/admin/InventoryPage';
+import StaffPage from './Pages/admin/StaffPage';
+import ProductDetailPage from './Pages/products/ProductDetailPage';
 
 const routes = [
   { path: '/', loader: () => storefrontApi.home(), component: HomePage },
   { path: '/campaigns', loader: () => storefrontApi.campaigns(), component: CampaignsPage },
   { path: '/categories', loader: () => storefrontApi.categories(), component: CategoriesPage },
+  { path: '/categories/:slug', loader: ({ params }) => storefrontApi.categoryBySlug(params.slug), component: CategoryDetailPage },
   { path: '/search', loader: ({ query }) => storefrontApi.products(Object.fromEntries(query)), component: SearchPage },
-  { path: '/products/:id', loader: ({ params }) => storefrontApi.product(params.id).then((data) => ({ ...data, productId: Number(params.id) })), component: ProductDetailsPage },
+  { path: '/product/:slug', loader: ({ params }) => storefrontApi.productBySlug(params.slug), component: ProductDetailPage },
+  { path: '/products/:id', loader: ({ params }) => storefrontApi.product(params.id).then((data) => ({ ...data, productId: Number(params.id), product: data.product || data.data })), component: ProductDetailsPage },
   { path: '/cart', loader: () => Promise.resolve({}), component: CartPage },
   { path: '/wishlist', loader: () => Promise.resolve({}), component: WishlistPage },
   { path: '/checkout', loader: () => storefrontApi.checkoutSettings(), component: CheckoutPage },
@@ -168,6 +184,20 @@ export default function App() {
           <Route path="/admin/settings" element={<AdminLayout><SettingsPage /></AdminLayout>} />
           <Route path="/admin/banners" element={<AdminLayout><BannersPage /></AdminLayout>} />
           <Route path="/admin/footer-settings" element={<AdminLayout><FooterSettingsPage /></AdminLayout>} />
+          <Route path="/admin/categories" element={<AdminLayout><AdminCategoriesPage /></AdminLayout>} />
+          <Route path="/admin/submenus" element={<AdminLayout><SubmenusPage /></AdminLayout>} />
+          <Route path="/admin/cms" element={<AdminLayout><PagesPage /></AdminLayout>} />
+          <Route path="/admin/cms/media" element={<AdminLayout><MediaLibraryPage /></AdminLayout>} />
+          <Route path="/admin/cms/menus" element={<AdminLayout><MenusPage /></AdminLayout>} />
+          <Route path="/admin/cms/faq" element={<AdminLayout><FaqPage /></AdminLayout>} />
+          <Route path="/admin/brands" element={<AdminLayout><BrandsPage /></AdminLayout>} />
+          <Route path="/admin/shipping" element={<AdminLayout><AdminShippingPage /></AdminLayout>} />
+          <Route path="/admin/payments" element={<AdminLayout><PaymentsPage /></AdminLayout>} />
+          <Route path="/admin/attributes" element={<AdminLayout><AttributesPage /></AdminLayout>} />
+          <Route path="/admin/inventory" element={<AdminLayout><InventoryPage /></AdminLayout>} />
+          <Route path="/admin/staff" element={<AdminLayout><StaffPage /></AdminLayout>} />
+          <Route path="/admin/marketing" element={<AdminLayout><BannersPage /></AdminLayout>} />
+          <Route path="/admin/reports" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
           
           {/* Storefront Routes */}
           {routes.map((route) => (

@@ -153,7 +153,7 @@ export default function FlashSalePage() {
     }, [products, sortBy]);
 
     return (
-        <MobileShell title="Flash Sale" showSearch={false}>
+        <MobileShell title="Flash Sale" showSearch={false} simpleHeader={true}>
             <Head title="Flash Sale" />
             <section className="space-y-4 px-4 py-4">
                 {/* Flash Sale Header */}

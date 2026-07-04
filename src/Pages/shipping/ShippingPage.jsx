@@ -3,7 +3,7 @@ import MobileShell from '@/Components/Storefront/MobileShell';
 
 export default function ShippingPage() {
     return (
-        <MobileShell title="Shipping Information">
+        <MobileShell title="Shipping Information" simpleHeader={true}>
             <Head title="Shipping Information" />
 
             <section className="space-y-4 px-4 py-4">

@@ -3,31 +3,20 @@ import { createContext, useContext, useState, useCallback } from 'react';
 const CurrencyContext = createContext(null);
 
 const EXCHANGE_RATES = {
-    USD: 1,
-    EUR: 0.92,
-    GBP: 0.79,
-    JPY: 149.50,
-    CAD: 1.36,
-    AUD: 1.53,
-    BDT: 110.00,
+    BDT: 1,
 };
 
 const CURRENCY_SYMBOLS = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    CAD: 'C$',
-    AUD: 'A$',
     BDT: '৳',
 };
 
 export const CurrencyProvider = ({ children }) => {
     const [currency, setCurrencyState] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('progotix_currency') || 'USD';
+            // Clear any old currency and force BDT
+            localStorage.removeItem('progotix_currency');
         }
-        return 'USD';
+        return 'BDT';
     });
 
     const setCurrency = useCallback((code) => {

@@ -14,7 +14,10 @@ export async function apiRequest(path, options = {}) {
     ...requestOptions 
   } = options;
 
-  const url = new URL(`${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`);
+  const url = new URL(
+    `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`,
+    API_BASE_URL.startsWith('http') ? undefined : window.location.origin
+  );
   Object.entries(requestOptions.params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, value);
   });
@@ -67,7 +70,10 @@ export const storefrontApi = {
   home: () => apiRequest('/storefront/home'),
   products: (params) => apiRequest('/storefront/products', { params }),
   product: (id) => apiRequest(`/storefront/products/${id}`),
+  productBySlug: (slug) => apiRequest(`/storefront/products/slug/${slug}`),
   categories: () => apiRequest('/storefront/categories'),
+  categoryBySlug: (slug) => apiRequest(`/storefront/categories/${slug}`),
+  categorySubmenus: (slug) => apiRequest(`/storefront/categories/${slug}/submenus`),
   campaigns: () => apiRequest('/storefront/campaigns'),
   checkoutSettings: () => apiRequest('/storefront/checkout/settings'),
   orders: () => apiRequest('/storefront/orders'),

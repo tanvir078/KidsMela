@@ -60,7 +60,7 @@ function TrendingCard({ product, rank }) {
                         onClick={() => addItem(product, 1)}
                         className="mt-2 h-7 w-full rounded-lg bg-rose-600 text-[11px] font-bold text-white transition-all active:scale-95 active:bg-rose-700"
                     >
-                        Add Style
+                        Add to Cart
                     </button>
                 )}
             </div>

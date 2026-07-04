@@ -3,7 +3,7 @@ import MobileShell from '@/Components/Storefront/MobileShell';
 
 export default function ReturnPolicyPage() {
     return (
-        <MobileShell title="Return Policy">
+        <MobileShell title="Return Policy" simpleHeader={true}>
             <Head title="Return Policy" />
 
             <section className="space-y-4 px-4 py-4">

@@ -89,7 +89,7 @@ export default function CartPage() {
             <Head title="Cart" />
 
             <section className="min-h-screen bg-white pb-24 lg:min-h-0 lg:bg-transparent lg:px-6 lg:py-6">
-                <div className="sticky top-0 z-30 border-b border-slate-100 bg-[#560056] px-4 py-3 shadow-sm lg:hidden">
+                <div className="sticky top-0 z-30 border-b border-slate-100 bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-3 shadow-sm lg:hidden">
                     <div className="flex items-center justify-between gap-3">
                         <h1 className="text-lg font-semibold text-white">
                             Cart
@@ -175,28 +175,28 @@ export default function CartPage() {
                     </div>
 
                 {items.length === 0 ? (
-                    <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-8 text-center shadow-sm ring-1 ring-slate-200">
-                        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-orange-100">
-                            <svg viewBox="0 0 24 24" className="h-12 w-12 text-orange-600" fill="none" aria-hidden="true">
+                    <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-12 text-center shadow-xl ring-1 ring-slate-200">
+                        <div className="mx-auto grid h-32 w-32 place-items-center rounded-full bg-rose-100">
+                            <svg viewBox="0 0 24 24" className="h-16 w-16 text-rose-600" fill="none" aria-hidden="true">
                                 <path d="M4 5h2l1.4 9.2a2 2 0 0 0 2 1.8h6.8a2 2 0 0 0 1.9-1.4L20 8H7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                                 <circle cx="9" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
                                 <circle cx="20" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">Your cart is empty</h2>
-                        <p className="mt-2 text-sm font-semibold text-slate-500">
+                        <h2 className="mt-6 text-2xl font-black text-slate-950">Your cart is empty</h2>
+                        <p className="mt-3 text-sm font-semibold text-slate-500">
                             Add products from the home page
                         </p>
-                        <Link href="/" className="mt-6 inline-flex rounded-2xl bg-orange-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200">
+                        <Link href="/" className="mt-6 inline-flex rounded-2xl bg-rose-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 hover:scale-105">
                             Shop Now
                         </Link>
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {items.map((item) => (
-                                <article key={item.id} className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 transition-all duration-200 hover:shadow-md hover:ring-slate-300">
-                                    <Link href={`/products/${item.product.id}`} className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                                <article key={item.id} className="flex gap-4 rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200 transition-all duration-300 hover:shadow-xl hover:ring-slate-300">
+                                    <Link href={`/products/${item.product.id}`} className="h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-slate-100 transition-transform duration-300 hover:scale-105">
                                         {item.product.image_url ? (
                                             <img src={item.product.image_url} alt={item.product.name} className="h-full w-full object-cover" />
                                         ) : (
@@ -223,20 +223,20 @@ export default function CartPage() {
                                             </div>
                                         )}
                                         <p className="mt-2 text-lg font-black text-rose-600">{money(item.product.price)}</p>
-                                        <div className="mt-2 flex items-center justify-between gap-2">
-                                            <div className="flex h-9 items-center rounded-xl bg-slate-100 px-1">
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <div className="flex h-10 items-center rounded-xl bg-slate-100 px-1">
                                                 <button
                                                     type="button"
                                                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                    className="grid h-7 w-7 place-items-center rounded-lg bg-white font-black transition-all duration-200 hover:bg-slate-50 active:scale-95"
+                                                    className="grid h-8 w-8 place-items-center rounded-lg bg-white font-black transition-all duration-300 hover:bg-slate-50 hover:scale-110 active:scale-95"
                                                 >
                                                     -
                                                 </button>
-                                                <span className="w-8 text-center text-sm font-black">{item.quantity}</span>
+                                                <span className="w-10 text-center text-sm font-black">{item.quantity}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                    className="grid h-7 w-7 place-items-center rounded-lg bg-white font-black transition-all duration-200 hover:bg-slate-50 active:scale-95"
+                                                    className="grid h-8 w-8 place-items-center rounded-lg bg-white font-black transition-all duration-300 hover:bg-slate-50 hover:scale-110 active:scale-95"
                                                 >
                                                     +
                                                 </button>
@@ -244,7 +244,7 @@ export default function CartPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => removeItem(item.id)}
-                                                className="rounded-xl bg-red-50 px-3 py-2 text-xs font-black text-red-600 transition-all duration-200 hover:bg-red-100 active:scale-95"
+                                                className="rounded-xl bg-red-50 px-4 py-2 text-xs font-black text-red-600 transition-all duration-300 hover:bg-red-100 hover:shadow-md active:scale-95"
                                             >
                                                 Remove
                                             </button>
@@ -254,16 +254,16 @@ export default function CartPage() {
                             ))}
                         </div>
 
-                        <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <h2 className="text-lg font-black text-slate-950">Order Summary</h2>
-                            <div className="mt-4 space-y-3 text-sm font-bold text-slate-600">
+                        <div className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-200">
+                            <h2 className="text-xl font-black text-slate-950">Order Summary</h2>
+                            <div className="mt-4 space-y-4 text-sm font-bold text-slate-600">
                                 <div className="flex justify-between">
                                     <span>Subtotal</span>
-                                    <span>{money(subtotal)}</span>
+                                    <span className="text-slate-900">{money(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Delivery</span>
-                                    <span>{money(delivery)}</span>
+                                    <span className="text-slate-900">{money(delivery)}</span>
                                 </div>
                                 {appliedCoupon && (
                                     <div className="flex justify-between text-emerald-600">
@@ -271,20 +271,20 @@ export default function CartPage() {
                                         <span>-{money(discount)}</span>
                                     </div>
                                 )}
-                                <div className="border-t border-dashed border-slate-200 pt-3">
-                                    <div className="flex justify-between text-lg font-black text-slate-950">
+                                <div className="border-t-2 border-dashed border-slate-200 pt-4">
+                                    <div className="flex justify-between text-xl font-black text-slate-950">
                                         <span>Total</span>
-                                        <span>{money(total)}</span>
+                                        <span className="text-rose-600">{money(total)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-4 space-y-2">
+                            <div className="mt-6 space-y-3">
                                 {!appliedCoupon ? (
                                     <button
                                         type="button"
                                         onClick={() => setShowCouponInput(!showCouponInput)}
-                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 transition-all duration-200 hover:bg-slate-200 active:scale-95"
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 transition-all duration-300 hover:bg-slate-200 active:scale-95"
                                     >
                                         <span>🎟️</span>
                                         {showCouponInput ? 'Hide Coupon' : 'Apply Coupon'}
@@ -296,7 +296,7 @@ export default function CartPage() {
                                             removeCoupon();
                                             addToast('Coupon removed', 'info');
                                         }}
-                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition-all duration-200 hover:bg-emerald-100 active:scale-95"
+                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 transition-all duration-300 hover:bg-emerald-100 active:scale-95"
                                     >
                                         <span>✓</span>
                                         Applied: {appliedCoupon.code}
@@ -310,12 +310,12 @@ export default function CartPage() {
                                             value={couponCode}
                                             onChange={(e) => setCouponCode(e.target.value)}
                                             placeholder="Enter coupon code"
-                                            className="h-12 flex-1 rounded-2xl border-slate-200 px-4 text-sm font-semibold focus:border-orange-500 focus:ring-orange-500"
+                                            className="h-12 flex-1 rounded-2xl border-2 border-slate-200 px-4 text-sm font-semibold focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all"
                                         />
                                         <button
                                             type="button"
                                             onClick={handleApplyCoupon}
-                                            className="h-12 rounded-2xl bg-orange-600 px-4 text-sm font-black text-white transition-all duration-200 hover:bg-orange-700 active:scale-95"
+                                            className="h-12 rounded-2xl bg-rose-600 px-6 text-sm font-black text-white transition-all duration-300 hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-200 active:scale-95"
                                         >
                                             Apply
                                         </button>
@@ -332,21 +332,21 @@ export default function CartPage() {
                                                     setCouponCode(code);
                                                     setShowCouponInput(true);
                                                 }}
-                                                className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-700 transition-all duration-200 hover:bg-orange-100 active:scale-95"
+                                                className="rounded-full bg-rose-50 px-4 py-2 text-xs font-black text-rose-700 transition-all duration-300 hover:bg-rose-100 hover:shadow-md active:scale-95"
                                             >
                                                 {code}
                                             </button>
                                         ))}
                                     </div>
                                 )}
-                            </div>
 
-                            <Link
-                                href="/checkout"
-                                className="mt-5 flex h-12 items-center justify-center rounded-2xl bg-orange-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95"
-                            >
-                                Go to Checkout
-                            </Link>
+                                <Link
+                                    href="/checkout"
+                                    className="mt-5 flex h-14 items-center justify-center rounded-2xl bg-rose-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 hover:scale-105 active:scale-95"
+                                >
+                                    Go to Checkout
+                                </Link>
+                            </div>
                         </div>
                     </>
                 )}

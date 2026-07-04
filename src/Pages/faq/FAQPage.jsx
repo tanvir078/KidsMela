@@ -1,6 +1,7 @@
 import { Head, Link } from '@/lib/inertiaCompat';
 import { useState } from 'react';
 import MobileShell from '@/Components/Storefront/MobileShell';
+import { Button, Card } from '@/Components/UI';
 
 const faqs = [
     {
@@ -95,11 +96,11 @@ export default function FAQPage() {
     const [expandedQuestion, setExpandedQuestion] = useState(null);
 
     return (
-        <MobileShell title="FAQ">
+        <MobileShell title="FAQ" simpleHeader={true}>
             <Head title="FAQ" />
 
             <section className="space-y-4 px-4 py-4">
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-orange-200">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600 p-5 text-white shadow-xl shadow-rose-200">
                     <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
                     <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-white/10" />
                     <div className="relative">
@@ -113,7 +114,7 @@ export default function FAQPage() {
                     </div>
                 </div>
 
-                <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                <Card padding="p-4" className="shadow-md">
                     <div className="flex flex-wrap gap-2">
                         {faqs.map((faq) => (
                             <button
@@ -125,7 +126,7 @@ export default function FAQPage() {
                                 }}
                                 className={`rounded-full px-4 py-2 text-xs font-black transition-all ${
                                     expandedCategory === faq.category
-                                        ? 'bg-orange-600 text-white'
+                                        ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
                                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                 }`}
                             >
@@ -133,17 +134,17 @@ export default function FAQPage() {
                             </button>
                         ))}
                     </div>
-                </div>
+                </Card>
 
                 <div className="space-y-3">
                     {faqs
                         .find((faq) => faq.category === expandedCategory)
                         ?.questions.map((item, index) => (
-                            <div key={index} className="rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+                            <Card key={index} padding="p-4" className="shadow-md hoverable">
                                 <button
                                     type="button"
                                     onClick={() => setExpandedQuestion(expandedQuestion === index ? null : index)}
-                                    className="flex w-full items-center justify-between p-4 text-left"
+                                    className="flex w-full items-center justify-between text-left"
                                 >
                                     <span className="flex-1 text-sm font-bold text-slate-900">{item.q}</span>
                                     <div className={`ml-3 transition-transform ${expandedQuestion === index ? 'rotate-180' : ''}`}>
@@ -153,23 +154,23 @@ export default function FAQPage() {
                                     </div>
                                 </button>
                                 {expandedQuestion === index && (
-                                    <div className="px-4 pb-4">
+                                    <div className="mt-3 pt-3 border-t border-slate-100">
                                         <p className="text-sm font-medium text-slate-600">{item.a}</p>
                                     </div>
                                 )}
-                            </div>
+                            </Card>
                         ))}
                 </div>
 
-                <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-5 text-center shadow-sm ring-1 ring-slate-200">
+                <Card padding="p-5" className="bg-gradient-to-br from-slate-50 to-slate-100 shadow-md text-center">
                     <h2 className="text-lg font-black text-slate-950">Still have questions?</h2>
                     <p className="mt-2 text-sm font-semibold text-slate-600">
                         Can't find the answer you're looking for? Please reach out to our support team.
                     </p>
-                    <Link href="/contact" className="mt-4 inline-flex rounded-2xl bg-orange-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-orange-200 transition-all duration-200 hover:bg-orange-700 active:scale-95">
-                        Contact Support
+                    <Link href="/contact">
+                        <Button className="mt-4">Contact Support</Button>
                     </Link>
-                </div>
+                </Card>
             </section>
         </MobileShell>
     );

@@ -6,7 +6,7 @@ export default function LanguageSelectPage() {
     const { language, changeLanguage, availableLanguages } = useLanguage();
 
     return (
-        <MobileShell title="Display Language" showSearch={false}>
+        <MobileShell title="Display Language" showSearch={false} simpleHeader={true}>
             <Head title="Display Language" />
             <section className="px-4 py-4 pb-8">
                 {/* Header */}

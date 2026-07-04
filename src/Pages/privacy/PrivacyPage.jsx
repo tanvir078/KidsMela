@@ -3,7 +3,7 @@ import MobileShell from '@/Components/Storefront/MobileShell';
 
 export default function PrivacyPage() {
     return (
-        <MobileShell title="Privacy Policy">
+        <MobileShell title="Privacy Policy" simpleHeader={true}>
             <Head title="Privacy Policy" />
 
             <section className="space-y-4 px-4 py-4">

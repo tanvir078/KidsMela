@@ -37,21 +37,49 @@ export const adminApi = {
     return response.json();
   },
 
-  createProduct: async (productData) => {
+  productCreateData: async () => {
+    const response = await fetch(`${API_BASE}/products/add`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch product create data');
+    return response.json();
+  },
+
+  productEditData: async (id) => {
+    const response = await fetch(`${API_BASE}/products/${id}/edit`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch product edit data');
+    return response.json();
+  },
+
+  createProduct: async (formData) => {
+    const headers = {};
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE}/products`, {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(productData),
+      headers,
+      body: formData,
     });
     if (!response.ok) throw new Error('Failed to create product');
     return response.json();
   },
 
-  updateProduct: async (id, productData) => {
+  updateProduct: async (id, formData) => {
+    const headers = {};
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(`${API_BASE}/products/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(productData),
+      method: 'POST',
+      headers,
+      body: formData,
     });
     if (!response.ok) throw new Error('Failed to update product');
     return response.json();
@@ -288,6 +316,116 @@ export const adminApi = {
       body: JSON.stringify({ history_id: historyId }),
     });
     if (!response.ok) throw new Error('Failed to restore footer settings');
+    return response.json();
+  },
+
+  // Categories
+  categories: async () => {
+    const response = await fetch(`${API_BASE}/categories`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch categories');
+    return response.json();
+  },
+
+  featuredCategories: async () => {
+    const response = await fetch(`${API_BASE}/categories/featured`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch featured categories');
+    return response.json();
+  },
+
+  createCategory: async (categoryData) => {
+    const formData = categoryData instanceof FormData ? categoryData : JSON.stringify(categoryData);
+    const headers = getAuthHeaders();
+    if (!(categoryData instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    } else {
+      delete headers['Content-Type'];
+    }
+
+    const response = await fetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to create category');
+    return response.json();
+  },
+
+  updateCategory: async (id, categoryData) => {
+    const formData = categoryData instanceof FormData ? categoryData : JSON.stringify(categoryData);
+    const headers = getAuthHeaders();
+    if (!(categoryData instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    } else {
+      delete headers['Content-Type'];
+    }
+
+    const response = await fetch(`${API_BASE}/categories/${id}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to update category');
+    return response.json();
+  },
+
+  deleteCategory: async (id) => {
+    const response = await fetch(`${API_BASE}/categories/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to delete category');
+    return response.json();
+  },
+
+  // Submenus
+  submenus: async () => {
+    const response = await fetch(`${API_BASE}/submenus`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch submenus');
+    return response.json();
+  },
+
+  createSubmenu: async (formData) => {
+    const headers = getAuthHeaders();
+    if (formData instanceof FormData) {
+      delete headers['Content-Type'];
+    }
+
+    const response = await fetch(`${API_BASE}/submenus`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to create submenu');
+    return response.json();
+  },
+
+  updateSubmenu: async (id, formData) => {
+    const headers = getAuthHeaders();
+    if (formData instanceof FormData) {
+      delete headers['Content-Type'];
+    }
+
+    const response = await fetch(`${API_BASE}/submenus/${id}`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to update submenu');
+    return response.json();
+  },
+
+  deleteSubmenu: async (id) => {
+    const response = await fetch(`${API_BASE}/submenus/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to delete submenu');
     return response.json();
   },
 };

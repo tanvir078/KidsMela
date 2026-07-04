@@ -1,5 +1,5 @@
 import { Link } from '@/lib/inertiaCompat';
-import { Mail, Phone, MapPin, Shield, Truck, RotateCcw } from 'lucide-react';
+import { Mail, Phone, MapPin, Shield, Truck, RotateCcw, ArrowUp, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { storefrontApi } from '@/lib/api';
 
@@ -80,6 +80,9 @@ const paymentMethods = [
 
 export default function Footer() {
   const [footerSettings, setFooterSettings] = useState(null);
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
     const loadFooterSettings = async () => {
@@ -92,6 +95,27 @@ export default function Footer() {
     };
     loadFooterSettings();
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault();
+    if (email) {
+      setSubscribed(true);
+      setEmail('');
+      setTimeout(() => setSubscribed(false), 3000);
+    }
+  };
 
   const settings = footerSettings || {
     brand_name: 'Kids Mela',
@@ -150,11 +174,11 @@ export default function Footer() {
 
   return (
     <footer className="hidden lg:block border-t border-slate-200 bg-slate-900 text-slate-300">
-      {/* Main footer */}
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
-          {/* Brand column */}
-          <div className="col-span-2">
+      {/* Main footer - 4 Column Layout */}
+      <div className="px-6 py-12">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+          {/* Column 1: Brand Info & Contact */}
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-rose-600 to-fuchsia-700 shadow-lg shadow-rose-500/30">
                 {settings.logo_url ? (
@@ -176,7 +200,7 @@ export default function Footer() {
             <p className="mt-4 text-sm leading-relaxed text-slate-400">
               {settings.brand_description}
             </p>
-            
+
             {/* Contact Info */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-3 text-sm text-slate-400">
@@ -199,7 +223,7 @@ export default function Footer() {
                 <a
                   href={settings.facebook_url}
                   aria-label="Facebook"
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all hover:bg-rose-600 hover:text-white"
+                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all duration-300 hover:bg-rose-600 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-rose-500/30"
                 >
                   <Facebook className="h-5 w-5" />
                 </a>
@@ -208,7 +232,7 @@ export default function Footer() {
                 <a
                   href={settings.instagram_url}
                   aria-label="Instagram"
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all hover:bg-rose-600 hover:text-white"
+                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all duration-300 hover:bg-rose-600 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-rose-500/30"
                 >
                   <Instagram className="h-5 w-5" />
                 </a>
@@ -217,7 +241,7 @@ export default function Footer() {
                 <a
                   href={settings.twitter_url}
                   aria-label="Twitter"
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all hover:bg-rose-600 hover:text-white"
+                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all duration-300 hover:bg-rose-600 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-rose-500/30"
                 >
                   <Twitter className="h-5 w-5" />
                 </a>
@@ -226,11 +250,91 @@ export default function Footer() {
                 <a
                   href={settings.youtube_url}
                   aria-label="Youtube"
-                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all hover:bg-rose-600 hover:text-white"
+                  className="grid h-10 w-10 place-items-center rounded-xl bg-slate-800 text-slate-400 transition-all duration-300 hover:bg-rose-600 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-rose-500/30"
                 >
                   <Youtube className="h-5 w-5" />
                 </a>
               )}
+            </div>
+
+            {/* Newsletter */}
+            <div className="mt-6">
+              <h4 className="text-sm font-bold text-white mb-3">Subscribe to Newsletter</h4>
+              <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email"
+                  className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none transition-all"
+                />
+                <button
+                  type="submit"
+                  className="rounded-lg bg-rose-600 px-3 py-2 text-white transition-all duration-300 hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-500/30"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </form>
+              {subscribed && (
+                <p className="mt-2 text-xs font-semibold text-green-400 animate-slide-down">
+                  ✓ Subscribed successfully!
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2: Quick Links */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Quick Links</h3>
+            <ul className="mt-4 space-y-3">
+              {settings.quick_links?.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-slate-400 transition-colors hover:text-rose-400"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Customer Service */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Customer Service</h3>
+            <ul className="mt-4 space-y-3">
+              {settings.customer_service_links?.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-slate-400 transition-colors hover:text-rose-400"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Legal & Social */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Legal</h3>
+            <ul className="mt-4 space-y-3">
+              {settings.legal_links?.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-slate-400 transition-colors hover:text-rose-400"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Additional Social Links */}
+            <div className="mt-6 flex gap-3 flex-wrap">
               {settings.linkedin_url && settings.linkedin_url !== '#' && (
                 <a
                   href={settings.linkedin_url}
@@ -266,25 +370,6 @@ export default function Footer() {
               )}
             </div>
           </div>
-
-          {/* Link columns */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">{title}</h3>
-              <ul className="mt-4 space-y-3">
-                {links?.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-slate-400 transition-colors hover:text-rose-400"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -359,6 +444,17 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 grid h-12 w-12 place-items-center rounded-full bg-rose-600 text-white shadow-lg shadow-rose-500/30 transition-all duration-300 hover:bg-rose-700 hover:scale-110 animate-slide-down"
+          aria-label="Back to top"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
+      )}
     </footer>
   );
 }

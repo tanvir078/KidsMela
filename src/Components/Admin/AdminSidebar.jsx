@@ -1,15 +1,22 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, BarChart3, LogOut, Image, LayoutTemplate } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, BarChart3, LogOut, Image, LayoutTemplate, FolderTree, Tag, Warehouse, Truck, CreditCard, FileText, Megaphone, FileBarChart, Shield } from 'lucide-react';
 
 export default function AdminSidebar() {
   const menuItems = [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/products', icon: Package, label: 'Products' },
+    { path: '/admin/categories', icon: FolderTree, label: 'Categories' },
+    { path: '/admin/brands', icon: Tag, label: 'Brands' },
+    { path: '/admin/attributes', icon: LayoutTemplate, label: 'Attributes' },
+    { path: '/admin/inventory', icon: Warehouse, label: 'Inventory' },
     { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
     { path: '/admin/customers', icon: Users, label: 'Customers' },
-    { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-    { path: '/admin/banners', icon: Image, label: 'Banners' },
-    { path: '/admin/footer-settings', icon: LayoutTemplate, label: 'Footer Settings' },
+    { path: '/admin/shipping', icon: Truck, label: 'Shipping' },
+    { path: '/admin/payments', icon: CreditCard, label: 'Payments' },
+    { path: '/admin/cms', icon: FileText, label: 'CMS' },
+    { path: '/admin/marketing', icon: Megaphone, label: 'Marketing' },
+    { path: '/admin/reports', icon: FileBarChart, label: 'Reports' },
+    { path: '/admin/staff', icon: Shield, label: 'Staff' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 

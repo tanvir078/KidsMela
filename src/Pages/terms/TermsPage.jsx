@@ -3,7 +3,7 @@ import MobileShell from '@/Components/Storefront/MobileShell';
 
 export default function TermsPage() {
     return (
-        <MobileShell title="Terms & Conditions">
+        <MobileShell title="Terms & Conditions" simpleHeader={true}>
             <Head title="Terms & Conditions" />
 
             <section className="space-y-4 px-4 py-4">

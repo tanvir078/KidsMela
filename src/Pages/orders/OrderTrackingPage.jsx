@@ -26,7 +26,7 @@ export default function OrderTrackingPage({ order }) {
 
     if (!user) {
         return (
-            <MobileShell title="Order Tracking" showSearch={false}>
+            <MobileShell title="Order Tracking" showSearch={false} simpleHeader={true}>
                 <Head title="Order Tracking" />
                 <section className="space-y-4 px-4 py-4">
                     <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -59,7 +59,7 @@ export default function OrderTrackingPage({ order }) {
 
     if (!order) {
         return (
-            <MobileShell title="Order Tracking" showSearch={false}>
+            <MobileShell title="Order Tracking" showSearch={false} simpleHeader={true}>
                 <Head title="Order Tracking" />
                 <section className="space-y-4 px-4 py-4">
                     <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-8 text-center shadow-sm ring-1 ring-slate-200">
@@ -90,7 +90,7 @@ export default function OrderTrackingPage({ order }) {
     const shipment = order.shipments?.[0];
 
     return (
-        <MobileShell title="Order Tracking" showSearch={false}>
+        <MobileShell title="Order Tracking" showSearch={false} simpleHeader={true}>
             <Head title={`Order #${order.id}`} />
 
             <section className="space-y-4 px-4 py-4">

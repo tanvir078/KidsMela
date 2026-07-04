@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import { useCart } from '@/Contexts/CartContext';
 import { useSearchHistory } from '@/Contexts/SearchHistoryContext';
+import { useTheme } from '@/Contexts/ThemeContext';
 import Toast from './Toast';
 import LiveChat from './LiveChat';
 import DesktopHeader from './DesktopHeader';
@@ -75,9 +76,11 @@ export default function MobileShell({
     contentOverBanner = false,
     showPromoBanner = true,
     hideTopBar = false,
+    simpleHeader = false,
 }) {
     const { itemCount } = useCart();
     const { history, addToHistory, clearHistory } = useSearchHistory();
+    const { theme, toggleTheme } = useTheme();
     const { url } = usePage();
 
     const [searchFocused, setSearchFocused] = useState(false);
@@ -208,12 +211,14 @@ export default function MobileShell({
 
                 <header
                     className={`${
-                        contentOverBanner
+                        simpleHeader
+                            ? 'sticky top-0 bg-gradient-to-r from-rose-600 to-pink-600 shadow-sm'
+                            : contentOverBanner
                             ? 'fixed inset-x-0 top-0 mx-auto max-w-md overflow-hidden bg-transparent'
-                            : 'sticky top-0 bg-[#e8fbff] shadow-sm'
+                            : 'sticky top-0 bg-gradient-to-r from-rose-600 to-pink-600 shadow-sm'
                     } z-50 lg:hidden`}
                 >
-                    {showPromoBanner && contentOverBanner && (
+                    {!simpleHeader && showPromoBanner && contentOverBanner && (
                         <div className="pointer-events-none absolute left-0 top-0 z-0 h-[260px] w-full overflow-hidden">
                             <Swiper
                                 modules={[]}
@@ -239,11 +244,29 @@ export default function MobileShell({
                         </div>
                     )}
 
-                    <div className="relative z-50 flex min-h-[58px] items-center gap-2 px-3 pb-2 pt-[max(env(safe-area-inset-top),2px)]">
-                        {showSearch && (
+                    <div className="relative z-50 flex min-h-[60px] items-center gap-2 px-4 pb-3 pt-[max(env(safe-area-inset-top),4px)]">
+                        {simpleHeader ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => window.history.back()}
+                                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/20 text-white shadow-md ring-1 ring-white/30 transition-all hover:bg-white/30 active:scale-95"
+                                    aria-label="Go back"
+                                >
+                                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M15 18l-6-6 6-6" />
+                                    </svg>
+                                </button>
+                                <div className="min-w-0 flex-1">
+                                    <h1 className="truncate text-lg font-black text-white">{title}</h1>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {showSearch && (
                             <div className="relative z-50 min-w-0 flex-1" ref={searchRef}>
                                 <form onSubmit={submitSearch} className="relative">
-                                    <div className={`flex h-10 items-center gap-2 rounded bg-white pl-3 shadow-sm ring-1 transition-all duration-200 ${searchFocused ? 'ring-cyan-400' : 'ring-white/50'}`}>
+                                    <div className={`flex h-11 items-center gap-2 rounded-2xl bg-white pl-4 shadow-md ring-2 transition-all duration-300 ${searchFocused ? 'ring-rose-400' : 'ring-white/50'}`}>
                                         <input
                                             value={query}
                                             onChange={(event) => setQuery(event.target.value)}
@@ -266,7 +289,7 @@ export default function MobileShell({
                                                     setQuery('');
                                                     setSuggestions([]);
                                                 }}
-                                                className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-slate-200 text-slate-500"
+                                                className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-200 text-slate-500 transition-all hover:bg-slate-300"
                                             >
                                                 <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
                                                     <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
@@ -276,7 +299,7 @@ export default function MobileShell({
 
                                         <button
                                             type="submit"
-                                            className="grid h-10 w-10 shrink-0 place-items-center rounded-r bg-[#0c4964] text-white"
+                                            className="grid h-11 w-11 shrink-0 place-items-center rounded-r-2xl bg-rose-600 text-white transition-all hover:bg-rose-700 active:scale-95"
                                             aria-label="Search"
                                         >
                                             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
@@ -287,12 +310,12 @@ export default function MobileShell({
                                 </form>
 
                                 {showSuggestions && (suggestions.length > 0 || history.length > 0) && (
-                                    <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
+                                    <div className="absolute left-0 right-0 top-full z-[70] mt-2 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl">
                                         {history.length > 0 && (
-                                            <div className="border-b border-gray-100 px-4 py-3">
+                                            <div className="border-b border-slate-100 px-4 py-3">
                                                 <div className="mb-2 flex items-center justify-between">
-                                                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Recent</p>
-                                                    <button type="button" onClick={clearHistory} className="text-xs font-semibold text-orange-500">
+                                                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Recent</p>
+                                                    <button type="button" onClick={clearHistory} className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors">
                                                         Clear
                                                     </button>
                                                 </div>
@@ -307,7 +330,7 @@ export default function MobileShell({
                                                                 setShowSuggestions(false);
                                                                 router.get('/search', { q: item }, { preserveState: false });
                                                             }}
-                                                            className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors active:bg-gray-100"
+                                                            className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-100 active:bg-slate-200"
                                                         >
                                                             {item}
                                                         </button>
@@ -326,19 +349,19 @@ export default function MobileShell({
                                                             setQuery('');
                                                             setShowSuggestions(false);
                                                         }}
-                                                        className="flex items-center gap-3 px-4 py-2.5 transition-colors active:bg-gray-50"
+                                                        className="flex items-center gap-3 px-4 py-3 transition-all hover:bg-slate-50 active:bg-slate-100"
                                                     >
-                                                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                                                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-slate-100">
                                                             {product.image_url ? (
                                                                 <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
                                                             ) : (
-                                                                <div className="grid h-full place-items-center text-[10px] text-gray-400">No img</div>
+                                                                <div className="grid h-full place-items-center text-[10px] text-slate-400">No img</div>
                                                             )}
                                                         </div>
 
                                                         <div className="min-w-0 flex-1">
                                                             <p className="truncate text-sm font-semibold text-slate-800">{product.name}</p>
-                                                            <p className="text-xs text-gray-400">{product.category || 'Product'}</p>
+                                                            <p className="text-xs text-slate-400">{product.category || 'Product'}</p>
                                                         </div>
                                                     </Link>
                                                 ))}
@@ -351,17 +374,34 @@ export default function MobileShell({
 
                         {!showSearch && (
                             <div className="min-w-0 flex-1">
-                                <h1 className="truncate text-base font-black text-slate-800">{title}</h1>
+                                <h1 className="truncate text-lg font-black text-slate-800">{title}</h1>
                             </div>
                         )}
 
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={toggleTheme}
+                                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/90 text-slate-500 shadow-md ring-1 ring-white/60 transition-all hover:bg-white hover:shadow-lg active:scale-95 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
+                                aria-label="Toggle theme"
+                            >
+                                {theme === 'dark' ? (
+                                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="12" cy="12" r="4" />
+                                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                                    </svg>
+                                ) : (
+                                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                                    </svg>
+                                )}
+                            </button>
                             <button
                                 type="button"
                                 onClick={() => {
                                   window.open('https://lens.google.com/', '_blank', 'noopener,noreferrer');
                                 }}
-                                className="grid h-9 w-9 shrink-0 place-items-center rounded bg-white/90 text-slate-500 shadow-sm ring-1 ring-white/60 active:bg-white"
+                                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/90 text-slate-500 shadow-md ring-1 ring-white/60 transition-all hover:bg-white hover:shadow-lg active:scale-95 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
                                 aria-label="Search with Google Lens"
                             >
                                 <img
@@ -371,16 +411,18 @@ export default function MobileShell({
                                 />
                             </button>
                         </div>
+                    </>
+                        )}
                     </div>
 
-                    {showPromoBanner && !contentOverBanner && (
-                        <div className="px-3 pb-4">
+                    {!simpleHeader && showPromoBanner && !contentOverBanner && (
+                        <div className="px-4 pb-4">
                             <Swiper
                                 modules={[Autoplay, Pagination]}
                                 autoplay={{ delay: 3200, disableOnInteraction: false }}
                                 pagination={{ clickable: true }}
                                 loop={promoBanners.length > 1}
-                                className="overflow-hidden  rounded-md shadow-sm"
+                                className="overflow-hidden rounded-2xl shadow-lg"
                             >
                                 {promoBanners.map((banner, index) => (
                                     <SwiperSlide key={`${banner.id}-${index}`}>
@@ -388,7 +430,7 @@ export default function MobileShell({
                                             <img
                                                 src={banner.image}
                                                 alt={banner.alt}
-                                                className="h-[165px] w-full object-cover"
+                                                className="h-[180px] w-full object-cover"
                                             />
                                         </Link>
                                     </SwiperSlide>
@@ -399,12 +441,12 @@ export default function MobileShell({
 
                     {showPromoBanner && contentOverBanner && (
                         <div className="relative z-50 overflow-hidden px-4">
-                            <div className="flex gap-5 overflow-x-auto whitespace-nowrap pb-1 text-[12px] font-black text-white drop-shadow scrollbar-hide">
+                            <div className="flex gap-6 overflow-x-auto whitespace-nowrap pb-2 text-[13px] font-black text-white drop-shadow scrollbar-hide">
                                 {topCategoryTabs.map((tab) => (
                                     <Link
                                         key={tab}
                                         href={tab === 'All' ? '/' : `/search?category=${encodeURIComponent(tab)}`}
-                                        className={`shrink-0 border-b-2 pb-1 ${tab === 'All' ? 'border-white' : 'border-transparent'}`}
+                                        className={`shrink-0 border-b-2 pb-1.5 transition-all ${tab === 'All' ? 'border-white' : 'border-transparent hover:border-white/50'}`}
                                     >
                                         {tab}
                                     </Link>
@@ -414,15 +456,15 @@ export default function MobileShell({
                     )}
                 </header>
 
-              <div className={`relative z-30 lg:mx-auto lg:max-w-7xl lg:px-6 ${contentOverBanner && !hideTopBar ? 'pt-[260px] lg:pt-0' : ''}`}>
+              <div className={`relative z-30 lg:px-4 ${contentOverBanner && !hideTopBar ? 'pt-[260px] lg:pt-0' : ''}`}>
 
                     <main className={`pb-20 lg:pb-8 lg:py-6 ${contentOverBanner ? 'relative z-30 bg-white lg:bg-transparent' : ''}`}>
                         {children}
                     </main>
                 </div>
 
-                <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-rose-100 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-lg lg:hidden">
-                    <div className="grid h-[68px] grid-cols-5">
+                <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md border-t border-rose-100 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-lg lg:hidden dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-[0_-8px_24px_rgba(0,0,0,0.3)]">
+                    <div className="grid h-[72px] grid-cols-5">
                         {navItems.map((item) => {
                             const active = item.match.test(url);
 
@@ -430,21 +472,21 @@ export default function MobileShell({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className={`relative flex min-w-0 flex-col items-center justify-center gap-1 px-1 transition-colors ${
-                                        active ? 'text-rose-600' : 'text-slate-400'
+                                    className={`relative flex min-w-0 flex-col items-center justify-center gap-1.5 px-1 transition-all duration-300 ${
+                                        active ? 'text-rose-600' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
                                     }`}
                                 >
                                     <BottomNavIcon icon={item.icon} active={active} />
                                     <span className="max-w-full truncate text-[11px] font-bold leading-none">{item.label}</span>
 
                                     {item.label === 'Cart' && itemCount > 0 && (
-                                        <span className="absolute left-1/2 top-2 ml-2 grid min-h-[16px] min-w-[16px] place-items-center rounded-full bg-rose-600 px-1 text-[9px] font-bold text-white">
+                                        <span className="absolute left-1/2 top-2 ml-2 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-rose-600 px-1.5 text-[9px] font-bold text-white shadow-md shadow-rose-200">
                                             {itemCount}
                                         </span>
                                     )}
 
                                     {active && (
-                                        <span className="absolute bottom-1 left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-full bg-rose-600" />
+                                        <span className="absolute bottom-1 left-1/2 h-[3px] w-7 -translate-x-1/2 rounded-full bg-rose-600 shadow-md shadow-rose-200" />
                                     )}
                                 </Link>
                             );

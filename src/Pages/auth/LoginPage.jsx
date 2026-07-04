@@ -49,7 +49,7 @@ export default function LoginPage() {
     };
 
     return (
-        <MobileShell title="Login" showSearch={false}>
+        <MobileShell title="Login" showSearch={false} simpleHeader={true}>
             <Head title="Login" />
 
             <section className="min-h-[80vh] px-4 py-6">

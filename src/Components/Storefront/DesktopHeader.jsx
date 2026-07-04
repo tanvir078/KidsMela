@@ -3,38 +3,17 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCart } from '@/Contexts/CartContext';
 import { useWishlist } from '@/Contexts/WishlistContext';
 import { useSearchHistory } from '@/Contexts/SearchHistoryContext';
-import { useLanguage } from '@/Contexts/LanguageContext';
-import { useCurrency } from '@/Contexts/CurrencyContext';
+import { useTheme } from '@/Contexts/ThemeContext';
 import { getProducts } from '@/services/products';
 import { storefrontApi } from '@/lib/api';
-import { Globe, DollarSign, Phone, HeadphonesIcon, ChevronDown, User, LogOut, X, ChevronRight } from 'lucide-react';
-
-const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Categories', href: '/categories', megaMenu: true },
-  { label: 'New Arrivals', href: '/search?sort=newest' },
-  { label: 'Flash Sale', href: '/flash-sale' },
-  { label: 'Sale', href: '/search?discount=true' },
-  { label: 'Orders', href: '/orders' },
-];
-
-const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'bn', name: 'বাংলা', flag: '🇧🇩' },
-];
-
-const currencies = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
-];
+import { Phone, HeadphonesIcon, ChevronDown, User, LogOut, X, ChevronRight, Search, ShoppingCart, Heart, Moon, Sun } from 'lucide-react';
 
 export default function DesktopHeader() {
   const { url, auth } = usePage();
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { history, addToHistory, clearHistory } = useSearchHistory();
-  const { language, changeLanguage, availableLanguages } = useLanguage();
-  const { currency, setCurrency, availableCurrencies, currencySymbols } = useCurrency();
+  const { theme, toggleTheme } = useTheme();
 
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -42,17 +21,15 @@ export default function DesktopHeader() {
   const [allProducts, setAllProducts] = useState([]);
   const [searchCategory, setSearchCategory] = useState('all');
   const [trendingSearches, setTrendingSearches] = useState(['Dresses', 'Shirts', 'Jeans', 'Sneakers', 'Handbags', 'Jackets']);
-  const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [showAnnouncement, setShowAnnouncement] = useState(true);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [navigationItems, setNavigationItems] = useState([]);
+  const [navigationLoading, setNavigationLoading] = useState(true);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const searchRef = useRef(null);
-  const langRef = useRef(null);
-  const currencyRef = useRef(null);
   const userMenuRef = useRef(null);
   const megaMenuRef = useRef(null);
 
@@ -69,6 +46,19 @@ export default function DesktopHeader() {
       .catch(error => {
         console.error('Failed to load categories:', error);
         setCategoriesLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/navigation')
+      .then(res => res.json())
+      .then(data => {
+        setNavigationItems(data.data || []);
+        setNavigationLoading(false);
+      })
+      .catch(error => {
+        console.error('Failed to load navigation:', error);
+        setNavigationLoading(false);
       });
   }, []);
 
@@ -93,12 +83,6 @@ export default function DesktopHeader() {
     function handleClickOutside(e) {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSuggestions(false);
-      }
-      if (langRef.current && !langRef.current.contains(e.target)) {
-        setShowLangMenu(false);
-      }
-      if (currencyRef.current && !currencyRef.current.contains(e.target)) {
-        setShowCurrencyMenu(false);
       }
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setShowUserMenu(false);
@@ -143,7 +127,7 @@ export default function DesktopHeader() {
       {/* Announcement Banner */}
       {showAnnouncement && (
         <div className="bg-gradient-to-r from-rose-600 to-fuchsia-700 text-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-2 text-sm">
+          <div className="flex items-center justify-between px-6 py-2 text-sm">
             <p className="flex-1 text-center font-semibold">
               🔥 MEGA SALE: Up to 50% OFF on selected items! Free shipping on orders over ৳2000
             </p>
@@ -181,8 +165,8 @@ export default function DesktopHeader() {
       </div>
 
       {/* Main header */}
-      <div className="mx-auto max-w-7xl px-6 py-3">
-        <div className="flex items-center gap-8">
+      <div className="px-6 py-3">
+        <div className="flex items-center justify-between gap-8">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-rose-600 to-fuchsia-700 shadow-lg shadow-rose-200">
@@ -198,11 +182,11 @@ export default function DesktopHeader() {
           {/* Search */}
           <div ref={searchRef} className="relative flex-1 max-w-2xl">
             <form onSubmit={submitSearch} className="flex">
-              <div className="flex-1 flex rounded-l-xl border border-slate-300 bg-slate-50 focus-within:border-rose-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-rose-500">
+              <div className="flex-1 flex rounded-xl border-2 border-slate-200 bg-slate-50 focus-within:border-rose-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-rose-500/20 transition-all duration-300">
                 <select
                   value={searchCategory}
                   onChange={(e) => setSearchCategory(e.target.value)}
-                  className="border-r border-slate-300 bg-transparent px-3 py-3 text-sm font-semibold text-slate-600 outline-none"
+                  className="border-r border-slate-200 bg-transparent px-3 py-3 text-sm font-semibold text-slate-600 outline-none"
                 >
                   <option value="all">All</option>
                   <option value="men">Men</option>
@@ -222,17 +206,10 @@ export default function DesktopHeader() {
               </div>
               <button
                 type="submit"
-                className="flex h-11 items-center gap-1.5 rounded-r-xl bg-rose-600 px-5 text-sm font-bold text-white transition-colors hover:bg-rose-700"
+                className="flex h-11 items-center gap-1.5 rounded-xl bg-rose-600 px-5 text-sm font-bold text-white transition-all duration-300 hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-200"
                 aria-label="Submit search"
               >
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                  <path
-                    d="m21 21-4.3-4.3m1.3-5.2a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <Search className="h-4 w-4" />
                 Search
               </button>
             </form>
@@ -328,7 +305,7 @@ export default function DesktopHeader() {
                           </p>
                         </div>
                         <p className="text-sm font-bold text-orange-600">
-                          {formatMoney(product.price)}
+                          ৳{Number(product.price ?? 0).toFixed(2)}
                         </p>
                       </Link>
                     ))}
@@ -354,82 +331,61 @@ export default function DesktopHeader() {
           </div>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1">
-            {/* Language Selector */}
-            <div ref={langRef} className="relative">
-              <button
-                onClick={() => setShowLangMenu(!showLangMenu)}
-                className="flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-              >
-                <Globe className="h-4 w-4" />
-                <span className="hidden xl:inline">{availableLanguages[language]?.flag || '🇺🇸'}</span>
-                <ChevronDown className="h-3 w-3" />
-              </button>
-              {showLangMenu && (
-                <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-slate-200 bg-white shadow-xl">
-                  {Object.entries(availableLanguages).map(([code, lang]) => (
-                    <button
-                      key={code}
-                      onClick={() => {
-                        changeLanguage(code);
-                        setShowLangMenu(false);
-                      }}
-                      className="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-                    >
-                      <span>{lang.flag}</span>
-                      <span>{lang.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center rounded-xl p-2.5 text-slate-600 transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
 
-            {/* Currency Selector */}
-            <div ref={currencyRef} className="relative">
-              <button
-                onClick={() => setShowCurrencyMenu(!showCurrencyMenu)}
-                className="flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-              >
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden xl:inline">{currencySymbols[currency] || '$'}</span>
-                <ChevronDown className="h-3 w-3" />
-              </button>
-              {showCurrencyMenu && (
-                <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-slate-200 bg-white shadow-xl">
-                  {availableCurrencies.map((code) => (
-                    <button
-                      key={code}
-                      onClick={() => {
-                        setCurrency(code);
-                        setShowCurrencyMenu(false);
-                      }}
-                      className="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-                    >
-                      <span>{currencySymbols[code]}</span>
-                      <span>{code}</span>
-                    </button>
-                  ))}
-                </div>
+            {/* Wishlist */}
+            <Link
+              href="/wishlist"
+              className="relative flex items-center justify-center rounded-xl p-2.5 text-slate-600 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
+              aria-label="Wishlist"
+            >
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-lg animate-bounce">
+                  {wishlistCount}
+                </span>
               )}
-            </div>
+            </Link>
+
+            {/* Cart */}
+            <Link
+              href="/cart"
+              className="relative flex items-center justify-center rounded-xl p-2.5 text-slate-600 transition-all duration-300 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400"
+              aria-label="Cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-lg animate-bounce">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
 
             {/* User Account */}
             <div ref={userMenuRef} className="relative">
               {auth?.user ? (
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-sm font-bold text-white">
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-600 text-sm font-bold text-white shadow-md">
                     {auth.user.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <span className="hidden xl:inline">{auth.user.name?.split(' ')[0]}</span>
-                  <ChevronDown className="h-3 w-3" />
+                  <ChevronDown className="h-3 w-3 transition-transform duration-300" style={{ transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)' }} />
                 </button>
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
                   <User className="h-5 w-5" />
                   <span className="hidden xl:inline">Login</span>
@@ -437,7 +393,7 @@ export default function DesktopHeader() {
               )}
 
               {showUserMenu && auth?.user && (
-                <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-xl border border-slate-200 bg-white shadow-xl">
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-xl animate-slide-down">
                   <div className="border-b border-slate-100 px-4 py-3">
                     <p className="font-bold text-slate-900">{auth.user.name}</p>
                     <p className="text-xs text-slate-500">{auth.user.email}</p>
@@ -472,15 +428,7 @@ export default function DesktopHeader() {
                       onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                     >
-                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                        <path
-                          d="M12 21s-7-4.4-9.2-8.5C.7 8.6 3.1 4 7.4 4c2 0 3.5 1 4.6 2.4C13.1 5 14.6 4 16.6 4c4.3 0 6.7 4.6 4.6 8.5C19 16.6 12 21 12 21Z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <Heart className="h-4 w-4" />
                       Wishlist
                     </Link>
                     <Link
@@ -567,117 +515,128 @@ export default function DesktopHeader() {
       <div className="border-t border-slate-100 bg-slate-50/80">
         <div className="mx-auto max-w-7xl px-6">
           <nav className="flex items-center gap-1">
-            {navLinks.map((link) => (
-              <div
-                key={link.href}
-                className="relative"
-                onMouseEnter={() => link.megaMenu && handleMouseEnter()}
-                onMouseLeave={() => link.megaMenu && handleMouseLeave()}
-              >
-                {link.megaMenu ? (
-                  <button
-                    onClick={() => handleClick()}
-                    className={`relative flex items-center gap-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
-                      isActive(link.href)
-                        ? 'text-rose-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {link.label}
-                    <ChevronDown className="h-3 w-3" />
-                    {isActive(link.href) && (
-                      <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-rose-600" />
-                    )}
-                  </button>
-                ) : (
-                  <Link
-                    href={link.href}
-                    className={`relative flex items-center gap-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
-                      isActive(link.href)
-                        ? 'text-rose-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {link.label}
-                    {isActive(link.href) && (
-                      <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-rose-600" />
-                    )}
-                  </Link>
-                )}
-
-                {/* Vertical List Mega Menu */}
-                {link.megaMenu && showMegaMenu && (
-                  <div
-                    ref={megaMenuRef}
-                    className="absolute left-0 top-full z-50 mt-0 w-64 rounded-b-2xl border-t border-slate-200 bg-white shadow-2xl"
-                  >
-                    {categoriesLoading ? (
-                      <div className="p-4 text-center text-sm font-semibold text-slate-500">
-                        Loading categories...
-                      </div>
-                    ) : categories.length === 0 ? (
-                      <div className="p-4 text-center text-sm font-semibold text-slate-500">
-                        No categories available
-                      </div>
-                    ) : (
-                      <div className="py-2">
-                        {categories.map((category) => (
-                          <div key={category.id} className="group">
-                            <Link
-                              href={`/categories?category=${category.id}`}
-                              className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-rose-600"
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600">
-                                  {category.icon_url ? (
-                                    <img src={category.icon_url} alt={category.name} className="h-5 w-5" />
-                                  ) : (
-                                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-                                      <path d="M4 7l8-4 8 4-8 4-8-4zm0 5l8 4 8-4M4 17l8 4 8-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                  )}
-                                </span>
-                                <span>{category.name}</span>
-                              </div>
-                              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-rose-500" />
-                            </Link>
-                            {category.children && category.children.length > 0 && (
-                              <div className="ml-11 border-l border-slate-100 pl-4">
-                                {category.children.slice(0, 5).map((sub) => (
-                                  <Link
-                                    key={sub.id}
-                                    href={`/search?category_id=${category.id}&subcategory=${sub.id}`}
-                                    className="block px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:text-rose-600"
-                                  >
-                                    {sub.name}
-                                  </Link>
-                                ))}
-                                {category.children.length > 5 && (
-                                  <Link
-                                    href={`/categories?category=${category.id}`}
-                                    className="block px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700"
-                                  >
-                                    View all {category.children.length} →
-                                  </Link>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="border-t border-slate-100 bg-slate-50 px-4 py-3">
-                      <Link
-                        href="/categories"
-                        className="block text-center text-sm font-bold text-rose-600 hover:text-rose-700"
-                      >
-                        View All Categories →
-                      </Link>
-                    </div>
-                  </div>
-                )}
+            {navigationLoading ? (
+              <div className="px-4 py-2.5 text-sm font-semibold text-slate-500">
+                Loading navigation...
               </div>
-            ))}
+            ) : navigationItems.length === 0 ? (
+              <div className="px-4 py-2.5 text-sm font-semibold text-slate-500">
+                No navigation items
+              </div>
+            ) : (
+              navigationItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="relative"
+                  onMouseEnter={() => item.type === 'mega_menu' && handleMouseEnter()}
+                  onMouseLeave={() => item.type === 'mega_menu' && handleMouseLeave()}
+                >
+                  {item.type === 'mega_menu' ? (
+                    <button
+                      onClick={() => handleClick()}
+                      className={`relative flex items-center gap-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                        isActive(item.link)
+                          ? 'text-rose-600'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {item.label}
+                      <ChevronDown className="h-3 w-3" />
+                      {isActive(item.link) && (
+                        <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-rose-600" />
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.link}
+                      target={item.target}
+                      className={`relative flex items-center gap-1 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                        isActive(item.link)
+                          ? 'text-rose-600'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {item.label}
+                      {isActive(item.link) && (
+                        <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-rose-600" />
+                      )}
+                    </Link>
+                  )}
+
+                  {/* Vertical List Mega Menu */}
+                  {item.type === 'mega_menu' && showMegaMenu && (
+                    <div
+                      ref={megaMenuRef}
+                      className="absolute left-0 top-full z-50 mt-0 w-64 rounded-b-2xl border-t border-slate-200 bg-white shadow-2xl"
+                    >
+                      {categoriesLoading ? (
+                        <div className="p-4 text-center text-sm font-semibold text-slate-500">
+                          Loading categories...
+                        </div>
+                      ) : categories.length === 0 ? (
+                        <div className="p-4 text-center text-sm font-semibold text-slate-500">
+                          No categories available
+                        </div>
+                      ) : (
+                        <div className="py-2">
+                          {categories.map((category) => (
+                            <div key={category.id} className="group">
+                              <Link
+                                href={`/categories?category=${category.id}`}
+                                className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-rose-600"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600">
+                                    {category.icon_url ? (
+                                      <img src={category.icon_url} alt={category.name} className="h-5 w-5" />
+                                    ) : (
+                                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                                        <path d="M4 7l8-4 8 4-8 4-8-4zm0 5l8 4 8-4M4 17l8 4 8-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                      </svg>
+                                    )}
+                                  </span>
+                                  <span>{category.name}</span>
+                                </div>
+                                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-rose-500" />
+                              </Link>
+                              {category.children && category.children.length > 0 && (
+                                <div className="ml-11 border-l border-slate-100 pl-4">
+                                  {category.children.slice(0, 5).map((sub) => (
+                                    <Link
+                                      key={sub.id}
+                                      href={`/search?category_id=${category.id}&subcategory=${sub.id}`}
+                                      className="block px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:text-rose-600"
+                                    >
+                                      {sub.name}
+                                    </Link>
+                                  ))}
+                                  {category.children.length > 5 && (
+                                    <Link
+                                      href={`/categories?category=${category.id}`}
+                                      className="block px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700"
+                                    >
+                                      View all {category.children.length} →
+                                    </Link>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="border-t border-slate-100 bg-slate-50 px-4 py-3">
+                        <Link
+                          href="/categories"
+                          className="block text-center text-sm font-bold text-rose-600 hover:text-rose-700"
+                        >
+                          View All Categories →
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </nav>
         </div>
       </div>

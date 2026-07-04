@@ -43,7 +43,7 @@ export default function WishlistPage() {
     };
 
     return (
-        <MobileShell title="Wishlist">
+        <MobileShell title="Wishlist" simpleHeader={true}>
             <Head title="Wishlist" />
 
             <section className="space-y-4 px-4 py-4">
@@ -77,12 +77,12 @@ export default function WishlistPage() {
 
                 {/* Filters */}
                 {items.length > 0 && (
-                    <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                    <div className="rounded-3xl bg-white p-4 shadow-md ring-1 ring-slate-200">
                         <div className="flex items-center gap-2">
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="h-10 rounded-xl border-slate-200 px-3 text-sm font-bold focus:border-orange-500 focus:ring-orange-500"
+                                className="h-10 rounded-xl border-2 border-slate-200 px-3 text-sm font-bold focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all duration-300"
                             >
                                 <option value="date">Sort by Date</option>
                                 <option value="price-low">Price: Low to High</option>
@@ -94,17 +94,17 @@ export default function WishlistPage() {
                 )}
 
                 {items.length === 0 ? (
-                    <div className="rounded-3xl bg-gradient-to-br from-rose-50 to-pink-100 p-8 text-center shadow-sm ring-1 ring-rose-200">
-                        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-white">
-                            <svg viewBox="0 0 24 24" className="h-12 w-12 text-rose-600" fill="currentColor" aria-hidden="true">
+                    <div className="rounded-3xl bg-gradient-to-br from-rose-50 to-pink-100 p-12 text-center shadow-xl ring-1 ring-rose-200">
+                        <div className="mx-auto grid h-32 w-32 place-items-center rounded-full bg-white shadow-lg">
+                            <svg viewBox="0 0 24 24" className="h-16 w-16 text-rose-600" fill="currentColor" aria-hidden="true">
                                 <path d="M12 21s-7-4.4-9.2-8.5C.7 8.6 3.1 4 7.4 4c2 0 3.5 1 4.6 2.4C13.1 5 14.6 4 16.6 4c4.3 0 6.7 4.6 4.6 8.5C19 16.6 12 21 12 21Z"/>
                             </svg>
                         </div>
-                        <h2 className="mt-5 text-xl font-black text-slate-950">No saved products yet</h2>
-                        <p className="mt-2 text-sm font-semibold text-slate-500">
+                        <h2 className="mt-6 text-2xl font-black text-slate-950">No saved products yet</h2>
+                        <p className="mt-3 text-sm font-semibold text-slate-500">
                             Tap the heart on any product to save it here.
                         </p>
-                        <Link href="/" className="mt-6 inline-flex rounded-2xl bg-rose-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-200 hover:bg-rose-700 active:scale-95">
+                        <Link href="/" className="mt-6 inline-flex rounded-2xl bg-rose-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 hover:scale-105">
                             Shop Now
                         </Link>
                     </div>

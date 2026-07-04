@@ -16,7 +16,7 @@ export default function CurrencySelectPage() {
     const { currency, setCurrency, availableCurrencies, currencySymbols } = useCurrency();
 
     return (
-        <MobileShell title="Currency" showSearch={false}>
+        <MobileShell title="Currency" showSearch={false} simpleHeader={true}>
             <Head title="Currency" />
             <section className="px-4 py-4 pb-8">
                 {/* Header */}

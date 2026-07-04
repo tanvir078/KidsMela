@@ -24,7 +24,7 @@ export default function BundlePage() {
     }, []);
 
     return (
-        <MobileShell title="Bundle Deals">
+        <MobileShell title="Bundle Deals" simpleHeader={true}>
             <Head title="Bundle Deals" />
 
             <section className="space-y-4 px-4 py-4">

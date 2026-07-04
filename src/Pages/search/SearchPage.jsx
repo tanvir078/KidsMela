@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import MobileShell from '@/Components/Storefront/MobileShell';
 import ProductCard from '@/Components/Storefront/ProductCard';
 import SkeletonLoader from '@/Components/Storefront/SkeletonLoader';
+import CategoryBanner from '@/Components/Storefront/CategoryBanner';
+import SidebarFilters from '@/Components/Storefront/SidebarFilters';
 
 const sortOptions = [
     { label: 'Best Match', value: 'match' },
@@ -82,6 +84,13 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
     const [minRating, setMinRating] = useState(0);
     const [inStockOnly, setInStockOnly] = useState(false);
     
+    // Sidebar filter states
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [tags, setTags] = useState([]);
+    const [selectedBrands, setSelectedBrands] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+    
     // Search autocomplete states
     const [searchInput, setSearchInput] = useState(queryText);
     const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -101,6 +110,31 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
     useEffect(() => {
         setActiveCategory(selectedCategory || 'All');
     }, [selectedCategory]);
+
+    // Fetch categories, brands, and tags for sidebar
+    useEffect(() => {
+        const fetchFilterData = async () => {
+            try {
+                const [categoriesRes, brandsRes] = await Promise.all([
+                    fetch('/api/categories'),
+                    fetch('/admin/brands')
+                ]);
+                
+                const categoriesData = await categoriesRes.json();
+                const brandsData = await brandsRes.json();
+                
+                setCategories(categoriesData.categories || []);
+                setBrands(brandsData.brands || []);
+                
+                // Tags - for now use empty array, can be added later
+                setTags([]);
+            } catch (error) {
+                console.error('Failed to fetch filter data:', error);
+            }
+        };
+        
+        fetchFilterData();
+    }, []);
 
     // Autocomplete logic
     useEffect(() => {
@@ -329,13 +363,39 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
     );
 
     return (
-        <MobileShell title="Shop Fashion">
+        <MobileShell title="Shop Fashion" simpleHeader={true}>
             <Head title={queryText ? `Search: ${queryText}` : 'Shop Fashion'} />
 
             <section className="px-3 py-4 lg:px-0">
-                {/* Search Input with Autocomplete */}
-                <div className="mb-4 relative">
-                    <div className="relative">
+                {/* Category Banner */}
+                <div className="mb-4">
+                    <CategoryBanner categoryId={activeCategory !== 'All' ? activeCategory : null} />
+                </div>
+
+                {/* Sidebar Layout */}
+                <div className="flex gap-6">
+                    {/* Left Sidebar */}
+                    <div className="hidden lg:block w-64 flex-shrink-0">
+                        <SidebarFilters
+                            categories={categories}
+                            brands={brands}
+                            tags={tags}
+                            selectedCategory={activeCategory}
+                            selectedBrands={selectedBrands}
+                            selectedTags={selectedTags}
+                            priceRange={priceRange}
+                            onCategoryChange={setActiveCategory}
+                            onBrandChange={setSelectedBrands}
+                            onTagChange={setSelectedTags}
+                            onPriceChange={setPriceRange}
+                        />
+                    </div>
+
+                    {/* Right Content */}
+                    <div className="flex-1">
+                        {/* Search Input with Autocomplete */}
+                        <div className="mb-4 relative">
+                            <div className="relative">
                         <input
                             ref={searchInputRef}
                             type="text"
@@ -355,7 +415,7 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
                                 setTimeout(() => setShowAutocomplete(false), 200);
                             }}
                             placeholder="Search products..."
-                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pl-12 text-sm font-semibold focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none"
+                            className="h-12 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 pl-12 text-sm font-semibold focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 focus:outline-none transition-all duration-300"
                         />
                         <svg viewBox="0 0 24 24" className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="8"/>
@@ -451,7 +511,7 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
                     )}
                 </div>
 
-                <div className="mb-4 rounded-md bg-slate-950 px-4 py-5 text-white lg:px-7 lg:py-6">
+                <div className="mb-4 rounded-2xl bg-slate-950 px-4 py-5 text-white shadow-xl lg:px-7 lg:py-6">
                     <p className="text-xs font-black uppercase tracking-[0.22em] text-rose-300">Kids Mela Catalog</p>
                     <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                         <div>
@@ -472,14 +532,14 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
                     <button
                         type="button"
                         onClick={() => setShowFilters(!showFilters)}
-                        className="h-11 flex-1 rounded-md bg-white text-sm font-black text-slate-800 shadow-sm ring-1 ring-slate-200"
+                        className="h-11 flex-1 rounded-xl bg-white text-sm font-black text-slate-800 shadow-md ring-1 ring-slate-200 transition-all duration-300 hover:bg-slate-50 active:scale-95"
                     >
                         Filters{activeFilterCount ? ` (${activeFilterCount})` : ''}
                     </button>
                     <select
                         value={sortBy}
                         onChange={(event) => setSortBy(event.target.value)}
-                        className="h-11 rounded-md border-slate-200 bg-white px-3 text-sm font-black text-slate-700"
+                        className="h-11 rounded-xl border-2 border-slate-200 bg-white px-3 text-sm font-black text-slate-700 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all duration-300"
                     >
                         {sortOptions.map((option) => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -488,61 +548,56 @@ export default function SearchPage({ products: loadedProducts = [], filters = {}
                 </div>
 
                 {showFilters && (
-                    <div className="mb-4 rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-200 lg:hidden">
+                    <div className="mb-4 rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200 lg:hidden">
                         {filtersPanel}
                     </div>
                 )}
 
-                <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-                    <aside className="hidden rounded-md bg-white p-5 shadow-sm ring-1 ring-slate-200 lg:block">
-                        <div className="mb-5 flex items-center justify-between">
-                            <h2 className="text-base font-black text-slate-950">Filters</h2>
-                            {activeFilterCount > 0 && (
-                                <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-black text-rose-700">{activeFilterCount}</span>
-                            )}
+                <div className="mb-4 hidden items-center justify-between rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200 lg:flex">
+                    <div>
+                        <h2 className="text-base font-black text-slate-950">{activeCategory === 'All' ? 'All Fashion' : activeCategory}</h2>
+                        <p className="text-xs font-semibold text-slate-500">{results.length} products available</p>
+                    </div>
+                    <select
+                        value={sortBy}
+                        onChange={(event) => setSortBy(event.target.value)}
+                        className="h-10 rounded-xl border-2 border-slate-200 bg-white px-3 text-sm font-black text-slate-700 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all duration-300"
+                    >
+                        {sortOptions.map((option) => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {isLoading && <SkeletonLoader type="card" count={8} />}
+
+                {error && (
+                    <div className="rounded-2xl bg-white p-8 text-center shadow-md ring-1 ring-red-100">
+                        <p className="text-sm font-bold text-red-600">{error}</p>
+                    </div>
+                )}
+
+                {!isLoading && !error && results.length === 0 && (
+                    <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 p-12 text-center shadow-xl ring-1 ring-slate-200">
+                        <div className="mx-auto grid h-32 w-32 place-items-center rounded-full bg-rose-100">
+                            <svg viewBox="0 0 24 24" className="h-16 w-16 text-rose-600" fill="none" aria-hidden="true">
+                                <path d="M4 5h2l1.4 9.2a2 2 0 0 0 2 1.8h6.8a2 2 0 0 0 1.9-1.4L20 8H7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                <circle cx="9" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
+                                <circle cx="20" cy="21" r="1" stroke="currentColor" strokeWidth="1.8" fill="currentColor"/>
+                            </svg>
                         </div>
-                        {filtersPanel}
-                    </aside>
-
-                    <div className="min-w-0">
-                        <div className="mb-4 hidden items-center justify-between rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-200 lg:flex">
-                            <div>
-                                <h2 className="text-base font-black text-slate-950">{activeCategory === 'All' ? 'All Fashion' : activeCategory}</h2>
-                                <p className="text-xs font-semibold text-slate-500">{results.length} products available</p>
-                            </div>
-                            <select
-                                value={sortBy}
-                                onChange={(event) => setSortBy(event.target.value)}
-                                className="h-10 rounded-md border-slate-200 bg-white px-3 text-sm font-black text-slate-700 focus:border-rose-500 focus:ring-rose-500"
-                            >
-                                {sortOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {isLoading && <SkeletonLoader type="card" count={8} />}
-
-                        {error && (
-                            <div className="rounded-md bg-white p-8 text-center shadow-sm ring-1 ring-red-100">
-                                <p className="text-sm font-bold text-red-600">{error}</p>
-                            </div>
-                        )}
-
-                        {!isLoading && !error && results.length === 0 && (
-                            <div className="rounded-md bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-                                <h2 className="text-xl font-black text-slate-950">No styles found</h2>
-                                <p className="mt-2 text-sm font-semibold text-slate-500">
-                                    Adjust your filters or browse the fashion categories.
-                                </p>
-                                <Link href="/categories" className="mt-5 inline-flex rounded-md bg-rose-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-rose-200">
-                                    Browse Categories
-                                </Link>
-                            </div>
-                        )}
+                        <h2 className="mt-6 text-2xl font-black text-slate-950">No styles found</h2>
+                        <p className="mt-3 text-sm font-semibold text-slate-500">
+                            Adjust your filters or browse the fashion categories.
+                        </p>
+                        <Link href="/categories" className="mt-6 inline-flex rounded-2xl bg-rose-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all duration-300 hover:bg-rose-700 hover:shadow-xl hover:shadow-rose-300 hover:scale-105">
+                            Browse Categories
+                        </Link>
+                    </div>
+                )}
 
                         {!isLoading && !error && results.length > 0 && (
-                            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
                                 {results.map((product) => (
                                     <ProductCard key={product.id} product={product} />
                                 ))}

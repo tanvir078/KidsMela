@@ -22,15 +22,19 @@ function normalizeProduct(product, variant = {}) {
         id: product.id,
         name: product.name,
         description: product.description,
-        price: Number(product.price ?? 0),
+        price: Number((variant.variant?.price || product.price) ?? 0),
+        sale_price: Number((variant.variant?.sale_price || product.sale_price) ?? 0),
         image_url: product.image_url,
-        stock: product.stock,
+        stock: variant.variant?.stock || product.stock,
         category: product.category,
         rating: product.rating,
         reviews_count: product.reviews_count,
-        selected_size: variant.size || product.selected_size,
+        selected_size: variant.size?.name || variant.size || product.selected_size,
         selected_color: variant.color?.name || variant.color || product.selected_color,
+        selected_color_hex: variant.color?.hex_code || null,
+        variant_id: variant.variant?.id || null,
         variant_key: variant.key || product.variant_key,
+        variant_data: variant.variant || null,
     };
 }
 
@@ -62,7 +66,7 @@ export function CartProvider({ children }) {
     const addItem = useCallback((product, quantity = 1, variant = {}) => {
         const amount = Math.max(1, Number(quantity) || 1);
         const safeProduct = normalizeProduct(product, variant);
-        const lineKey = `${safeProduct.id}-${safeProduct.selected_size || 'default'}-${safeProduct.selected_color || 'default'}`;
+        const lineKey = `${safeProduct.id}-${safeProduct.variant_id || 'default'}-${safeProduct.selected_size || 'default'}-${safeProduct.selected_color || 'default'}`;
 
         setItems((currentItems) => {
             const existing = currentItems.find((item) => item.lineKey === lineKey);

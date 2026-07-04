@@ -10,7 +10,7 @@ import TrendingProducts from '@/Components/Storefront/TrendingProducts';
 import BundleDeals from '@/Components/Storefront/BundleDeals';
 import RecentlyViewed from '@/Components/Storefront/RecentlyViewed';
 import Newsletter from '@/Components/Storefront/Newsletter';
-import { apiRequest } from '@/lib/api';
+import { apiRequest, storefrontApi } from '@/lib/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
@@ -23,6 +23,7 @@ export default function HomePage({ banners: propBanners = [] }) {
     const [offercategories, setOfferCategories] = useState([]);
     const [products, setProducts] = useState([]);
     const [bundles, setBundles] = useState([]);
+    const [featuredCategories, setFeaturedCategories] = useState([]);
     const [activeCategory, setActiveCategory] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -75,10 +76,20 @@ export default function HomePage({ banners: propBanners = [] }) {
         }
     };
 
+    const loadFeaturedCategories = async () => {
+        try {
+            const data = await apiRequest('/admin/categories/featured');
+            setFeaturedCategories(data.categories || []);
+        } catch (exception) {
+            console.error('Failed to load featured categories:', exception);
+        }
+    };
+
     useEffect(() => {
         loadProducts();
         loadBundles();
         loadBanners();
+        loadFeaturedCategories();
     }, []);
 
     const offerCategories = useMemo(() => {
@@ -116,45 +127,63 @@ export default function HomePage({ banners: propBanners = [] }) {
 
             <div className="space-y-4 bg-gradient-to-b from-slate-50 to-white px-2 py-2 lg:space-y-6 lg:bg-transparent lg:px-0 lg:py-0">
                 {/* Desktop Slide Banners */}
-                <section className="hidden lg:block overflow-hidden rounded-md bg-slate-950 text-white">
+                <section className="hidden lg:block overflow-hidden rounded-2xl bg-slate-950 text-white shadow-2xl">
                     <Swiper
                         modules={[Autoplay, Pagination, Navigation]}
-                        autoplay={{ delay: 4000, disableOnInteraction: false }}
-                        pagination={{ clickable: true }}
+                        autoplay={{ delay: 5000, disableOnInteraction: false }}
+                        pagination={{ clickable: true, dynamicBullets: true }}
                         navigation={true}
                         loop={banners.length > 1}
-                        className="min-h-[400px]"
+                        className="min-h-[450px]"
+                        style={{
+                            '--swiper-pagination-color': '#f43f5e',
+                            '--swiper-pagination-bullet-inactive-color': '#ffffff',
+                            '--swiper-pagination-bullet-inactive-opacity': '0.5',
+                        }}
                     >
                         {banners.map((banner) => (
                             <SwiperSlide key={banner.id}>
                                 <Link href={banner.link || '/search'} className="block h-full">
-                                    <div className="relative h-[400px]">
+                                    <div className="relative h-[450px]">
                                         {banner.image_url ? (
                                             <img
                                                 src={banner.image_url}
                                                 alt={banner.image_alt || banner.title}
-                                                className="h-full w-full object-cover"
+                                                className="h-full w-full object-cover transition-transform duration-700"
                                             />
                                         ) : (
-                                            <div className={`h-full w-full bg-gradient-to-r ${banner.gradient || 'from-orange-500 via-rose-500 to-fuchsia-600'}`}>
+                                            <div className={`h-full w-full bg-gradient-to-r ${banner.gradient || 'from-orange-500 via-rose-500 to-fuchsia-600'} animate-gradient`}>
                                                 <div className="flex h-full items-center justify-center px-20">
                                                     <div className="text-center">
-                                                        <p className="text-sm font-black uppercase tracking-[0.28em] text-rose-300">
-                                                            {banner.discount || 'Special Offer'}
-                                                        </p>
-                                                        <h2 className="mt-4 text-4xl font-black leading-tight">
+                                                        {banner.discount && (
+                                                            <span className="inline-block rounded-full bg-white/20 px-4 py-2 text-sm font-black uppercase tracking-[0.28em] text-white backdrop-blur-sm">
+                                                                {banner.discount}
+                                                            </span>
+                                                        )}
+                                                        <h2 className="mt-6 text-5xl font-black leading-tight text-white drop-shadow-lg">
                                                             {banner.title}
                                                         </h2>
                                                         {banner.description && (
-                                                            <p className="mt-4 max-w-lg text-sm font-semibold leading-6 text-slate-300">
+                                                            <p className="mt-4 max-w-lg text-lg font-semibold leading-7 text-white/90">
                                                                 {banner.description}
                                                             </p>
                                                         )}
+                                                        <button className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-8 py-3 text-sm font-black text-rose-600 shadow-lg transition-all duration-300 hover:bg-rose-50 hover:scale-105 hover:shadow-xl">
+                                                            Shop Now
+                                                            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
+                                                                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/30 to-transparent" />
+                                        {banner.discount && (
+                                            <div className="absolute top-6 left-6 rounded-full bg-rose-600 px-4 py-2 text-sm font-black text-white shadow-lg animate-bounce">
+                                                {banner.discount}
+                                            </div>
+                                        )}
                                     </div>
                                 </Link>
                             </SwiperSlide>
@@ -162,17 +191,68 @@ export default function HomePage({ banners: propBanners = [] }) {
                     </Swiper>
                 </section>
 
-                <section className="hidden grid-cols-3 gap-4 lg:grid">
-                    {fashionCollections.map((collection) => (
-                        <Link key={collection.label} href={collection.href} className="group relative h-[180px] overflow-hidden rounded-md bg-slate-900">
-                            <img src={collection.image} alt={collection.label} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                            <div className={`absolute inset-0 bg-gradient-to-t ${collection.tone}`} />
-                            <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                                <p className="text-xs font-black uppercase tracking-[0.18em] text-white/70">Collection</p>
-                                <h2 className="mt-1 text-xl font-black">{collection.label}</h2>
-                            </div>
+                <section className="hidden lg:block">
+                    <Swiper
+                        modules={[Navigation]}
+                        navigation={true}
+                        slidesPerView={4}
+                        spaceBetween={24}
+                        className="pb-8"
+                    >
+                        {featuredCategories.map((category) => (
+                            <SwiperSlide key={category.id}>
+                                <Link href={`/search?category=${encodeURIComponent(category.name)}`} className="group block">
+                                    <div className="relative h-[220px] overflow-hidden rounded-full bg-slate-900 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                                        {category.image_path ? (
+                                            <img 
+                                                src={`http://127.0.0.1:8001/storage/${category.image_path}`} 
+                                                alt={category.name} 
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                            />
+                                        ) : (
+                                            <div className="h-full w-full bg-gradient-to-br from-rose-500 to-fuchsia-600" />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 group-hover:from-black/70" />
+                                    </div>
+                                    <p className="mt-3 text-center text-sm font-black text-slate-900 group-hover:text-rose-600 transition-colors">
+                                        {category.name}
+                                    </p>
+                                </Link>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </section>
+
+                {/* New Arrivals Section */}
+                <section className="hidden lg:block">
+                    <div className="mb-6 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-3xl font-black text-slate-900">New Arrivals</h2>
+                            <p className="mt-1 text-sm font-semibold text-slate-500">Fresh styles just dropped</p>
+                        </div>
+                        <Link href="/search?sort=newest" className="text-sm font-bold text-rose-600 hover:text-rose-700 transition-colors">
+                            View All →
                         </Link>
-                    ))}
+                    </div>
+                    <Swiper
+                        modules={[Autoplay, Navigation]}
+                        autoplay={{ delay: 3000, disableOnInteraction: false }}
+                        navigation={true}
+                        slidesPerView={5}
+                        spaceBetween={20}
+                        className="pb-8"
+                    >
+                        {products.slice(0, 10).map((product) => (
+                            <SwiperSlide key={product.id}>
+                                <div className="relative">
+                                    <ProductCard product={product} />
+                                    <span className="absolute top-2 left-2 z-20 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg ring-2 ring-white">
+                                        New
+                                    </span>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
                 </section>
 
                 <div className="lg:hidden">

@@ -72,7 +72,7 @@ export default function OrdersPage({ orders = [] }) {
     };
 
     return (
-        <MobileShell title="Orders" showSearch={false}>
+        <MobileShell title="Orders" showSearch={false} simpleHeader={true}>
             <Head title="Orders" />
             <section className="space-y-4 px-4 py-4">
                 {status && (
